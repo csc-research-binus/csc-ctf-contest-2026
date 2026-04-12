@@ -1,0 +1,16 @@
+name: "Nama Challenge"
+author: "probsetter-username"
+category: web
+description: |
+  Deskripsi challenge yang akan muncul di CTFd.
+value: 500 #jangan di ganti
+type: standard         
+flags:
+  - flag: "CSC{contoh_flag_di_sini}"
+    type: static
+tags:
+  - web
+  - sqli
+files:
+  - dist/source.zip    #kalo gada file yg di upload ganti jadi files: []
+                        #intinya itu diganti sesuai file masing masing 

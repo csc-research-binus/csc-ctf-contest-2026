@@ -1,4 +1,4 @@
-name: Deploy Challenges to VPS
+name: Deploy to CTFd and VPS
 
 on:
   push:
@@ -6,20 +6,59 @@ on:
       - main
 
 jobs:
-  deploy:
+  sync-to-ctfd:
+    name: Sync Challenges to CTFd
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install ctfcli
+        run: pip install ctfcli
+
+      - name: Configure ctfcli
+        run: |
+          mkdir -p .ctf
+          echo '[config]' > .ctf/config
+          echo "url = ${{ secrets.CTFD_URL }}" >> .ctf/config
+          echo "access_token = ${{ secrets.CTFD_TOKEN }}" >> .ctf/config
+
+      - name: Sync Challenges
+        run: |
+          # Mencari semua file challenge.yml di dalam folder kategori
+          # lalu melakukan sinkronisasi dengan CTFd
+          for chal_file in $(find . -mindepth 2 -name "challenge.yml"); do
+            chal_dir=$(dirname "$chal_file")
+            echo "🚀 Syncing $chal_dir..."
+            ctf challenge sync "$chal_dir" || echo "❌ Failed to sync $chal_dir"
+          done
+
+  deploy-to-vps:
+    name: Deploy Containers to VPS
+    runs-on: ubuntu-latest
+    needs: sync-to-ctfd # Job ini jalan SETELAH soal berhasil ter-upload ke CTFd
+    steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 2222
+          port: ${{ secrets.SSH_PORT }}
           script: |
             cd /root/chall
+            echo "📦 Menarik update terbaru dari repository..."
             git pull origin main
+            
+            echo "🐳 Mencari dan merestart semua Docker container soal..."
+            # Command ini akan mencari file docker-compose.yml di setiap folder soal
+            # dan menjalankannya secara terisolasi tanpa mengganggu soal lain.
+            find . -mindepth 2 -name docker-compose.yml -execdir docker compose up -d --build \;
+            
+            echo "🧹 Membersihkan image docker yang sudah tidak terpakai..."
+            docker image prune -f
