@@ -3,10 +3,10 @@ author: "probsetter-username"
 category: web
 description: |
   Deskripsi challenge yang akan muncul di CTFd.
-value: 500
+value: 500 #jangan di ganti
 type: standard         
 flags:
-  - flag: "PETIR{contoh_flag_di_sini}"
+  - flag: "CSC{contoh_flag_di_sini}"
     type: static
 tags:
   - web
