@@ -1,0 +1,15 @@
+name: "ambalabu"
+author: "darflashxd"
+category: web
+description: |
+  aku sayang nasihuy
+value: 500
+type: standard
+flags:
+  - content: "CSC{nasihuy}"
+    type: static
+tags:
+  - web
+files: 
+  dist.zip
+hints: []
