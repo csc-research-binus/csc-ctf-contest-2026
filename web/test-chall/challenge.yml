@@ -1,0 +1,14 @@
+name: "Test Challenge"
+author: "darflashxd"
+category: web
+description: |
+  This is a test challenge.
+value: 100
+type: standard
+flags:
+  - flag: "CSC{test_flag_123}"
+    type: static
+tags:
+  - web
+files: []
+hints: []
