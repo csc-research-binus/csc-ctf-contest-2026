@@ -36,7 +36,7 @@ jobs:
           for chal_file in $(find . -mindepth 3 -maxdepth 3 -name "challenge.yml"); do
             chal_dir=$(dirname "$chal_file")
             chal_name=$(basename "$chal_dir")
-            echo "$chal_name = $chal_dir" >> .ctf/config
+            echo "$chal_name = ../${chal_dir#./}" >> .ctf/config
           done
 
           echo "📋 Generated config:"
