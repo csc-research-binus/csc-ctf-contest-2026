@@ -3,7 +3,7 @@ author: "darflashxd"
 category: web
 description: |
   This is a test challenge.
-value: 100
+value: 500
 type: standard
 flags:
   - content: "CSC{test_flag_123}"
