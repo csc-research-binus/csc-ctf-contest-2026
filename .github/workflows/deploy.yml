@@ -27,20 +27,40 @@ jobs:
           CTFD_TOKEN: ${{ secrets.CTFD_TOKEN }}
         run: |
           mkdir -p .ctf
-          printf '[config]\nurl = %s\naccess_token = %s\n' \
-            "$CTFD_URL" "$CTFD_TOKEN" > .ctf/config
+          
+          # 1. Buat base config dengan header [challenges] yang diwajibkan oleh Python configparser
+          cat <<EOF > .ctf/config
+          [config]
+          url = $CTFD_URL
+          access_token = $CTFD_TOKEN
+          
+          [challenges]
+          EOF
 
-          echo "✅ Auth config generated"
-          cat .ctf/config
-
+          # 2. Inject semua path challenge ke bawah header [challenges]
           for chall_file in */*/challenge.yml; do
             [ -e "$chall_file" ] || continue
             chall_dir=$(dirname "$chall_file")
-            echo "🚀 Deploying: $chall_dir"
-            ctf challenge sync "$chall_dir" || ctf challenge install "$chall_dir"
+            # Format: web/test-chall = web/test-chall
+            echo "$chall_dir = $chall_dir" >> .ctf/config
           done
 
+          echo "✅ Config Generated:"
+          cat .ctf/config
+
+          # 3. Eksekusi Sync & Install
+          for chall_file in */*/challenge.yml; do
+            [ -e "$chall_file" ] || continue
+            chall_dir=$(dirname "$chall_file")
+            echo "----------------------------------------"
+            echo "🚀 Deploying: $chall_dir"
+            
+            # Jika sync gagal (karena soal belum ada), jalankan install
+            ctf challenge sync "$chall_dir" || ctf challenge install "$chall_dir"
+          done
+          
           echo "🎉 Done!"
+
   deploy-to-vps:
     name: Deploy Containers to VPS
     runs-on: ubuntu-latest
