@@ -1,6 +1,6 @@
 name: "arenasu"
 author: "arenaru"
-category: web
+category: Forensic
 description: |
   bintang skbidi
 value: 500
@@ -9,7 +9,7 @@ flags:
   - content: "CSC{bintangmpruy}"
     type: static
 tags:
-  - forensic
+  - Forensic
 files: 
   - challenge.jpg
 hints: []
