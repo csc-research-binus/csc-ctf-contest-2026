@@ -21,28 +21,26 @@ jobs:
       - name: Install ctfcli
         run: pip install ctfcli
 
-      - name: Configure ctfcli
+      - name: Deploy Challenges to CTFd
+        env:
+          CTFD_URL: ${{ secrets.CTFD_URL }}
+          CTFD_TOKEN: ${{ secrets.CTFD_TOKEN }}
         run: |
           mkdir -p .ctf
-          REPO_ROOT=$(pwd)
+          printf '[config]\nurl = %s\naccess_token = %s\n' \
+            "$CTFD_URL" "$CTFD_TOKEN" > .ctf/config
 
-          printf '[config]\nurl = %s\naccess_token = %s\n\n[challenges]\n' \
-            "${{ secrets.CTFD_URL }}" \
-            "${{ secrets.CTFD_TOKEN }}" > .ctf/config
-
-          for chal_file in $(find . -mindepth 3 -maxdepth 3 -name "challenge.yml"); do
-            chal_dir=$(dirname "$chal_file")
-            chal_name=$(basename "$chal_dir")
-            echo "$chal_name = $REPO_ROOT/${chal_dir#./}" >> .ctf/config
-          done
-
-          echo "📋 Generated config:"
+          echo "✅ Auth config generated"
           cat .ctf/config
 
-      - name: Sync Challenges
-        run: |
-          ctf challenge sync
+          for chall_file in */*/challenge.yml; do
+            [ -e "$chall_file" ] || continue
+            chall_dir=$(dirname "$chall_file")
+            echo "🚀 Deploying: $chall_dir"
+            ctf challenge sync "$chall_dir" || ctf challenge install "$chall_dir"
+          done
 
+          echo "🎉 Done!"
   deploy-to-vps:
     name: Deploy Containers to VPS
     runs-on: ubuntu-latest
