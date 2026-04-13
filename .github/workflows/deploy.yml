@@ -24,24 +24,32 @@ jobs:
       - name: Configure ctfcli
         run: |
           mkdir -p .ctf
-          echo '[config]' > .ctf/config
-          echo "url = ${{ secrets.CTFD_URL }}" >> .ctf/config
-          echo "access_token = ${{ secrets.CTFD_TOKEN }}" >> .ctf/config
+
+          cat > .ctf/config << EOF
+          [config]
+          url = ${{ secrets.CTFD_URL }}
+          access_token = ${{ secrets.CTFD_TOKEN }}
+
+          [challenges]
+          EOF
+
+          for chal_file in $(find . -mindepth 3 -maxdepth 3 -name "challenge.yml"); do
+            chal_dir=$(dirname "$chal_file")
+            chal_name=$(basename "$chal_dir")
+            echo "$chal_name = $chal_dir" >> .ctf/config
+          done
+
+          echo "📋 Generated config:"
+          cat .ctf/config
 
       - name: Sync Challenges
         run: |
-          for chal_file in $(find . -mindepth 3 -maxdepth 3 -name "challenge.yml"); do
-            chal_dir=$(dirname "$chal_file")
-            echo "📝 Registering $chal_dir..."
-            ctf challenge add "$chal_dir" || true
-            echo "🚀 Syncing $chal_dir..."
-            ctf challenge push "$chal_dir" || echo "❌ Failed to sync $chal_dir"
-          done
+          ctf challenge sync
 
   deploy-to-vps:
     name: Deploy Containers to VPS
     runs-on: ubuntu-latest
-    needs: sync-to-ctfd # Job ini jalan SETELAH soal berhasil ter-upload ke CTFd
+    needs: sync-to-ctfd
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -54,11 +62,9 @@ jobs:
             cd /root/chall
             echo "📦 Menarik update terbaru dari repository..."
             git pull origin main
-            
+
             echo "🐳 Mencari dan merestart semua Docker container soal..."
-            # Command ini akan mencari file docker-compose.yml di setiap folder soal
-            # dan menjalankannya secara terisolasi tanpa mengganggu soal lain.
             find . -mindepth 2 -name docker-compose.yml -execdir docker compose up -d --build \;
-            
+
             echo "🧹 Membersihkan image docker yang sudah tidak terpakai..."
             docker image prune -f
