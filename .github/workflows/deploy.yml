@@ -30,12 +30,12 @@ jobs:
 
       - name: Sync Challenges
         run: |
-          # Mencari semua file challenge.yml di dalam folder kategori
-          # lalu melakukan sinkronisasi dengan CTFd
-          for chal_file in $(find . -mindepth 2 -name "challenge.yml"); do
+          for chal_file in $(find . -mindepth 3 -maxdepth 3 -name "challenge.yml"); do
             chal_dir=$(dirname "$chal_file")
+            echo "📝 Registering $chal_dir..."
+            ctf challenge add "$chal_dir" || true
             echo "🚀 Syncing $chal_dir..."
-            ctf challenge sync "$chal_dir" || echo "❌ Failed to sync $chal_dir"
+            ctf challenge push "$chal_dir" || echo "❌ Failed to sync $chal_dir"
           done
 
   deploy-to-vps:
