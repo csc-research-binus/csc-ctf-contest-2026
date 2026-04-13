@@ -11,5 +11,5 @@ flags:
 tags:
   - web
 files: 
-  dist.zip
+  - dist.zip
 hints: []
