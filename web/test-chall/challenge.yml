@@ -6,7 +6,7 @@ description: |
 value: 100
 type: standard
 flags:
-  - flag: "CSC{test_flag_123}"
+  - content: "CSC{test_flag_123}"
     type: static
 tags:
   - web
