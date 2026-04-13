@@ -24,19 +24,16 @@ jobs:
       - name: Configure ctfcli
         run: |
           mkdir -p .ctf
+          REPO_ROOT=$(pwd)
 
-          cat > .ctf/config << EOF
-          [config]
-          url = ${{ secrets.CTFD_URL }}
-          access_token = ${{ secrets.CTFD_TOKEN }}
-
-          [challenges]
-          EOF
+          printf '[config]\nurl = %s\naccess_token = %s\n\n[challenges]\n' \
+            "${{ secrets.CTFD_URL }}" \
+            "${{ secrets.CTFD_TOKEN }}" > .ctf/config
 
           for chal_file in $(find . -mindepth 3 -maxdepth 3 -name "challenge.yml"); do
             chal_dir=$(dirname "$chal_file")
             chal_name=$(basename "$chal_dir")
-            echo "$chal_name = ../${chal_dir#./}" >> .ctf/config
+            echo "$chal_name = $REPO_ROOT/${chal_dir#./}" >> .ctf/config
           done
 
           echo "📋 Generated config:"
