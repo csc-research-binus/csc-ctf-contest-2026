@@ -1,4 +1,4 @@
-name: "web1"
+name: "webambalabu"
 author: "arenaru"
 category: Forensic
 description: |
@@ -10,7 +10,7 @@ flags:
   - content: "CSC{bintangmpruy}"
     type: static
 tags:
-  - web
+  - ambalanasihuy
 files: 
   - dist.zip
 hints: []
