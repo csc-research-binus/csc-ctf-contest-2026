@@ -1,12 +1,13 @@
-name: "ambalabu"
-author: "darflashxd"
-category: web
+name: "web1"
+author: "arenaru"
+category: Forensic
 description: |
-  aku sayang nasihuy
+  bintang skbidi
 value: 500
 type: standard
+state: hidden
 flags:
-  - content: "CSC{nasihuy}"
+  - content: "CSC{bintangmpruy}"
     type: static
 tags:
   - web
