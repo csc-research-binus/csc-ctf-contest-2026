@@ -1,16 +1,16 @@
-name: "teswarmup"
-author: "arenaru"
-category: Forensic
+name: "tes_warm_ap"
+author: "nasijanda"
+category: web
 description: |
-  bintang skbidi
+  asku sayang bintang
 value: 500
 type: standard
-state: visible
+state: hidden
 flags:
   - content: "CSC{bintangmpruy}"
     type: static
 tags:
-  - Forensic
+  - nasihuy
 files: 
   - challenge.jpg
 hints: []
