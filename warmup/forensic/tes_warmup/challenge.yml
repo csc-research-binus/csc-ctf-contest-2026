@@ -1,11 +1,11 @@
-name: "jems"
+name: "teswarmup"
 author: "arenaru"
 category: Forensic
 description: |
   bintang skbidi
 value: 500
 type: standard
-state: visible
+state: hidden
 flags:
   - content: "CSC{bintangmpruy}"
     type: static
