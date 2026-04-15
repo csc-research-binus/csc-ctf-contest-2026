@@ -5,7 +5,7 @@ description: |
   asku sayang bintang
 value: 500
 type: standard
-state: hidden
+state: visible
 flags:
   - content: "CSC{bintangmpruy}"
     type: static
