@@ -38,7 +38,7 @@ jobs:
           EOF
 
           # 2. Inject semua path challenge ke bawah header [challenges]
-          for chall_file in */*/challenge.yml; do
+          for chall_file in */*/challenge.yml */*/*/challenge.yml; do
             [ -e "$chall_file" ] || continue
             chall_dir=$(dirname "$chall_file")
             echo "$chall_dir = $chall_dir" >> .ctf/config
@@ -48,7 +48,7 @@ jobs:
           cat .ctf/config
 
           # 3. Eksekusi Sync & Install
-          for chall_file in */*/challenge.yml; do
+          for chall_file in */*/challenge.yml */*/*/challenge.yml; do
             [ -e "$chall_file" ] || continue
             chall_dir=$(dirname "$chall_file")
             echo "----------------------------------------"
@@ -57,8 +57,6 @@ jobs:
             # Jika sync gagal (karena soal belum ada), jalankan install
             ctf challenge sync "$chall_dir" || ctf challenge install "$chall_dir"
           done
-          
-          echo "🎉 Done!"
 
   deploy-to-vps:
     name: Deploy Containers to VPS
