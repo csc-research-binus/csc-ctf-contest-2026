@@ -1,0 +1,15 @@
+name: "Forensic"
+author: "wavess"
+category: Reverse Engineering
+description: |
+  well well well
+value: 500
+type: standard
+state: hidden
+flags:
+  - content: "CSC{flag}"
+    type: static
+tags:
+  - Forensic
+files: []
+hints: []

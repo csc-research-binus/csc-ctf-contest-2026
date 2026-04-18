@@ -1,0 +1,20 @@
+name: "misc test"
+author: "darflashxd"
+category: Miscellaneous
+description: |
+  bintang skbidi
+
+  Coba perhatikan gambar petunjuk di bawah ini:
+  ![Gambar Petunjuk](https://postimg.cc/Bt4L6m09)
+  
+  Apakah kamu menemukan sesuatu?
+value: 500
+type: standard
+state: hidden
+flags:
+  - content: "CSC{flag}"
+    type: static
+tags:
+  - Miscellaneous
+files: []
+hints: []
