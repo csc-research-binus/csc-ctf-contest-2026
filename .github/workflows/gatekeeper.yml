@@ -1,3 +1,12 @@
+name: Gatekeeper - Admin Merge Only
+
+on:
+  pull_request:
+    branches:
+      - main
+  pull_request_review:
+    types: [submitted]
+
 jobs:
   enforce-admin-approval:
     name: Cek Hak Akses Approve & Merge
@@ -7,7 +16,7 @@ jobs:
         run: |
           echo "Triggered by: ${{ github.actor }} pada event: ${{ github.event_name }}"
           
-          # 1. Definisikan siapa saja yang berhak (gunakan format "user1" | "user2" | "user3")
+          # 1. Definisikan siapa saja yang berhak
           case "${{ github.actor }}" in
             "darflashxd" | "eludee" | "wavess")
               IS_ADMIN=true
