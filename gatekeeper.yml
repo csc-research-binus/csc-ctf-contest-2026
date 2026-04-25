@@ -1,0 +1,29 @@
+jobs:
+  enforce-admin-approval:
+    name: Cek Hak Akses Approve & Merge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verifikasi Aktor
+        run: |
+          echo "Triggered by: ${{ github.actor }} pada event: ${{ github.event_name }}"
+          
+          # 1. Definisikan siapa saja yang berhak (gunakan format "user1" | "user2" | "user3")
+          case "${{ github.actor }}" in
+            "darflashxd" | "eludee" | "wavess")
+              IS_ADMIN=true
+              ;;
+            *)
+              IS_ADMIN=false
+              ;;
+          esac
+          
+          # 2. Eksekusi pengecekan
+          if [ "${{ github.event_name }}" == "pull_request_review" ]; then
+            if [ "$IS_ADMIN" = false ]; then
+              echo "::error::AKSES DITOLAK! ${{ github.actor }} tidak memiliki otorisasi untuk melakukan Approve pada repositori ini."
+              exit 1
+            fi
+            echo "✅ Akses Approve Diterima dari ${{ github.actor }}."
+          fi
+          
+          exit 0
