@@ -99,31 +99,33 @@ jobs:
           echo "CHALL_DIRS=$UNIQUE_DIRS" >> $GITHUB_ENV
 
       - name: Deploy Container via SSH
-        # Step ini HANYA berjalan jika ada file docker-compose yang terpengaruh
         if: env.CHALL_DIRS != ''
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          username: ${{ secrets.SSH_USER }} # Pastikan ini sudah ctfdeploy di GitHub Secrets
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           envs: CHALL_DIRS
           script: |
-            cd /root/chall
+            # Set variabel direktori produksi yang baru
+            CTF_DIR="/home/ctfdeploy/csc-ctf-production/chall"
+            
+            cd $CTF_DIR
             echo "📦 Menarik update terbaru dari repository..."
             git pull origin main
 
             echo "🐳 Memulai Selective Deployment Docker..."
-            # Perintah find berbahaya telah dihapus dan diganti dengan loop dinamis
             for dir in $CHALL_DIRS; do
               echo "----------------------------------------"
               echo "🔄 Merestart container untuk tantangan: $dir"
-              cd "/root/chall/$dir"
+              cd "$CTF_DIR/$dir"
               
               docker compose down --remove-orphans
               docker compose up -d --build
               
-              cd /root/chall
+              # Kembali ke root direktori chall sebelum loop berikutnya
+              cd $CTF_DIR
             done
 
             echo "🧹 Membersihkan image docker yang sudah tidak terpakai..."
