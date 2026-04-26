@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Penting agar bisa membandingkan file yang berubah
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -21,14 +23,18 @@ jobs:
       - name: Install ctfcli
         run: pip install ctfcli
 
-      - name: Deploy Challenges to CTFd
+      - name: Dapatkan daftar file yang berubah
+        id: changed-ctfd-files
+        uses: tj-actions/changed-files@v44
+
+      - name: Deploy Challenges ke CTFd
         env:
           CTFD_URL: ${{ secrets.CTFD_URL }}
           CTFD_TOKEN: ${{ secrets.CTFD_TOKEN }}
         run: |
           mkdir -p .ctf
           
-          # 1. Buat base config dengan header [challenges] yang diwajibkan oleh Python configparser
+          # Buat header config dasar
           cat <<EOF > .ctf/config
           [config]
           url = $CTFD_URL
@@ -37,24 +43,38 @@ jobs:
           [challenges]
           EOF
 
-          # 2. Inject semua path challenge ke bawah header [challenges]
-          for chall_file in */*/challenge.yml */*/*/challenge.yml; do
-            [ -e "$chall_file" ] || continue
-            chall_dir=$(dirname "$chall_file")
-            echo "$chall_dir = $chall_dir" >> .ctf/config
+          # Logika mencari folder soal (level 2) dari file yang berubah
+          DIRS=""
+          for file in ${{ steps.changed-ctfd-files.outputs.all_changed_files }}; do
+            # Potong path untuk mendapatkan 'kategori/nama-soal'
+            CHALL_DIR=$(echo "$file" | cut -d'/' -f1,2)
+            
+            # Cek apakah ini folder soal yang valid (punya challenge.yml)
+            if [ -f "$CHALL_DIR/challenge.yml" ]; then
+              DIRS="$DIRS $CHALL_DIR"
+            fi
+          done
+          
+          # Hapus duplikasi folder
+          UNIQUE_DIRS=$(echo "$DIRS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
+
+          if [ -z "$UNIQUE_DIRS" ]; then
+            echo "ℹ️ Tidak ada perubahan pada file soal. Melewati tahap sync CTFd."
+            exit 0
+          fi
+
+          # Tambahkan direktori yang berubah ke ctfcli config
+          for dir in $UNIQUE_DIRS; do
+            echo "$dir = $dir" >> .ctf/config
           done
 
           echo "✅ Config Generated:"
           cat .ctf/config
 
-          # 3. Eksekusi Sync & Install
-          for chall_file in */*/challenge.yml */*/*/challenge.yml; do
-            [ -e "$chall_file" ] || continue
-            chall_dir=$(dirname "$chall_file")
+          # Eksekusi Sync/Install hanya untuk soal yang berubah
+          for chall_dir in $UNIQUE_DIRS; do
             echo "----------------------------------------"
-            echo "🚀 Deploying: $chall_dir"
-            
-            # Jika sync gagal (karena soal belum ada), jalankan install
+            echo "🚀 Deploying ke CTFd: $chall_dir"
             ctf challenge sync "$chall_dir" || ctf challenge install "$chall_dir"
           done
 
@@ -63,7 +83,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: sync-to-ctfd
     steps:
-      # WAJIB: fetch-depth 0 agar Git memiliki riwayat untuk membandingkan perubahan file
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -72,62 +91,54 @@ jobs:
       - name: Dapatkan daftar file yang berubah
         id: changed-files
         uses: tj-actions/changed-files@v44
-        with:
-          files: |
-            web/**
-            binex/**
 
       - name: Ekstrak direktori target Docker
         id: parse-dirs
         run: |
           DIRS=""
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            # Ambil format 'kategori/nama-soal'
             CHALL_DIR=$(echo "$file" | cut -d'/' -f1,2)
             
-            # Pastikan direktori memiliki docker-compose.yml
+            # Hanya deploy jika ada docker-compose.yml di folder tersebut
             if [ -f "$CHALL_DIR/docker-compose.yml" ]; then
               DIRS="$DIRS $CHALL_DIR"
             fi
           done
           
-          # Hapus duplikasi nama direktori
           UNIQUE_DIRS=$(echo "$DIRS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
-          echo "Direktori yang akan di-deploy: $UNIQUE_DIRS"
-          
-          # Simpan ke env untuk dikirim ke SSH
           echo "CHALL_DIRS=$UNIQUE_DIRS" >> $GITHUB_ENV
+          echo "Direktori terdeteksi: $UNIQUE_DIRS"
 
       - name: Deploy Container via SSH
         if: env.CHALL_DIRS != ''
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }} # Pastikan ini sudah ctfdeploy di GitHub Secrets
+          username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           envs: CHALL_DIRS
           script: |
-            # Set variabel direktori produksi yang baru
             CTF_DIR="/home/ctfdeploy/csc-ctf-production/chall"
-            
             cd $CTF_DIR
-            echo "📦 Menarik update terbaru dari repository..."
+            
+            echo "📦 Pulling update terbaru dari Git..."
             git pull origin main
 
-            echo "🐳 Memulai Selective Deployment Docker..."
             for dir in $CHALL_DIRS; do
               echo "----------------------------------------"
-              echo "🔄 Merestart container untuk tantangan: $dir"
-              cd "$CTF_DIR/$dir"
-              
-              docker compose down --remove-orphans
-              docker compose up -d --build
-              
-              # Kembali ke root direktori chall sebelum loop berikutnya
-              cd $CTF_DIR
+              echo "🔄 Restarting Container: $dir"
+              if [ -d "$CTF_DIR/$dir" ]; then
+                cd "$CTF_DIR/$dir"
+                # Menghapus container lama dan membangun ulang image agar perubahan source code masuk
+                docker compose down --remove-orphans
+                docker compose up -d --build
+                cd $CTF_DIR
+              else
+                echo "⚠️ Folder $dir tidak ditemukan di VPS!"
+              fi
             done
 
-            echo "🧹 Membersihkan image docker yang sudah tidak terpakai..."
+            echo "🧹 Membersihkan image lama untuk menghemat storage..."
             docker image prune -f
-            echo "✅ Deployment Selesai!"
+            echo "✅ Semua container berhasil di-update!"
