@@ -20,7 +20,7 @@ flags:
   - content: "CSC{4ku_b3Nc1_aNt1_d3bU993r_t0k!}"
     type: static
 tags:
-  - Reverse Engineering
+  - Hard
 files:
   - dist/source.zip
 

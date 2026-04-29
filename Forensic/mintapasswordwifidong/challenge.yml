@@ -21,8 +21,7 @@ flags:
   - content: "CSCCTF{karena_semua_soal_milik_yang_maha_kuasa_Sx3Jvb718s}"
     type: statics
 tags:
-  - Forensic
-  - memory
+  - Hard
 files: 
 - permisipaket.pcapng
 

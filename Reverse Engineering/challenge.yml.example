@@ -1,6 +1,6 @@
 name: "nama soal"
-author: "darflashxd"
-category: Miscellaneous
+author: "nama author"
+category: Miscellaneous (ganti sesuai kategori soal)
 description: |
   deskripsi soal
 
@@ -18,7 +18,7 @@ flags:
   - content: "CSC{flag}"
     type: static
 tags:
-  - Miscellaneous
+  - easy (ganti sesuai difficulty soal)
 files: []
 
 #kalo ada file ganti jadi
