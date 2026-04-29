@@ -27,7 +27,7 @@ jobs:
         id: changed-ctfd-files
         uses: tj-actions/changed-files@v44
         with:
-          separator: ',' # [FIX] Gunakan koma sebagai pemisah, bukan spasi
+          separator: ','
 
       - name: Deploy Challenges ke CTFd
         env:
@@ -36,6 +36,7 @@ jobs:
         run: |
           mkdir -p .ctf
           
+          # Biarkan [challenges] kosong agar ctfcli menganggap ini soal baru (stateless)
           cat <<EOF > .ctf/config
           [config]
           url = $CTFD_URL
@@ -44,17 +45,14 @@ jobs:
           [challenges]
           EOF
 
-          # [FIX] Ambil output dan ubah delimiter ke koma
           FILES="${{ steps.changed-ctfd-files.outputs.all_changed_files }}"
           IFS=',' read -r -a changed_files_array <<< "$FILES"
           
-          # [FIX] Gunakan associative array Bash untuk menghapus duplikasi tanpa memecah spasi
           declare -A UNIQUE_DIRS_MAP
           
           for file in "${changed_files_array[@]}"; do
             [ -z "$file" ] && continue
             
-            # Ekstrak 'kategori/nama-soal'
             CHALL_DIR=$(echo "$file" | cut -d'/' -f1,2)
             
             if [ -f "$CHALL_DIR/challenge.yml" ]; then
@@ -62,25 +60,28 @@ jobs:
             fi
           done
 
-          # Cek apakah array kosong
           if [ ${#UNIQUE_DIRS_MAP[@]} -eq 0 ]; then
             echo "ℹ️ Tidak ada perubahan pada file soal. Melewati tahap sync CTFd."
             exit 0
           fi
 
-          # Tambahkan direktori yang berubah ke config
-          for dir in "${!UNIQUE_DIRS_MAP[@]}"; do
-            echo "$dir = $dir" >> .ctf/config
-          done
-
           echo "✅ Config Generated:"
           cat .ctf/config
 
-          # Eksekusi Sync/Install
+          # [FIX] Eksekusi dengan Strict Error Handling
           for chall_dir in "${!UNIQUE_DIRS_MAP[@]}"; do
             echo "----------------------------------------"
             echo "🚀 Deploying ke CTFd: $chall_dir"
-            ctf challenge sync "$chall_dir" || ctf challenge install "$chall_dir"
+            
+            if ctf challenge sync "$chall_dir"; then
+              echo "✅ Berhasil Sync soal."
+            elif ctf challenge install "$chall_dir"; then
+              echo "✅ Berhasil Install soal baru."
+            else
+              echo "❌ ERROR FATAL: Gagal melakukan sync atau install untuk $chall_dir!"
+              echo "❌ Pipeline dihentikan. Silakan cek log di atas untuk melihat respon API CTFd."
+              exit 1 # <--- Memastikan pipeline menjadi MERAH jika gagal
+            fi
           done
 
   deploy-to-vps:
@@ -97,7 +98,7 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v44
         with:
-          separator: ',' # [FIX] Gunakan koma
+          separator: ','
 
       - name: Ekstrak direktori target Docker
         id: parse-dirs
@@ -116,13 +117,11 @@ jobs:
             fi
           done
           
-          # [FIX] Gabungkan direktori menggunakan delimiter pipe (|) untuk dikirim via SSH
           FINAL_DIRS=""
           for dir in "${!UNIQUE_DIRS_MAP[@]}"; do
             FINAL_DIRS="${FINAL_DIRS}${dir}|"
           done
           
-          # Hapus pipe separator di akhir string
           FINAL_DIRS=${FINAL_DIRS%|}
           
           echo "CHALL_DIRS=$FINAL_DIRS" >> $GITHUB_ENV
@@ -144,7 +143,6 @@ jobs:
             echo "📦 Pulling update terbaru dari Git..."
             git pull origin main
 
-            # [FIX] Parsing string environment variable dari GitHub Actions menggunakan pipe
             IFS='|' read -r -a dir_array <<< "$CHALL_DIRS"
 
             for dir in "${dir_array[@]}"; do
@@ -162,6 +160,6 @@ jobs:
               fi
             done
 
-            echo "🧹 Membersihkan image lama untuk menghemat storage..."
+            echo "🧹 Membersihkan image lama..."
             docker image prune -f
             echo "✅ Semua container berhasil di-update!"
