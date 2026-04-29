@@ -16,7 +16,7 @@ state: visible
 
 flags:
   - content: "CSC{flag}"
-    type: statics
+    type: static
 tags:
   - Miscellaneous
 files: []
