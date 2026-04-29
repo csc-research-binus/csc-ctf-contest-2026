@@ -2,8 +2,21 @@ name: Deploy to CTFd and VPS
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      challenge_dir:
+        description: 'Force one challenge dir, e.g. Reverse Engineering/gimmesbr'
+        required: false
+        type: string
+      base_sha:
+        description: 'Optional diff base SHA'
+        required: false
+        type: string
+      sha:
+        description: 'Optional diff target SHA'
+        required: false
+        type: string
 
 jobs:
   sync-to-ctfd:
@@ -23,20 +36,26 @@ jobs:
       - name: Install ctfcli
         run: pip install ctfcli
 
-      - name: Dapatkan daftar file yang berubah
-        id: changed-ctfd-files
+      - name: Dapatkan daftar direktori yang berubah
+        id: changed-dirs
+        if: ${{ github.event.inputs.challenge_dir == '' }}
         uses: tj-actions/changed-files@v44
         with:
-          separator: ','
+          dir_names: "true"
+          dir_names_max_depth: "2"
+          separator: "\n"
+          base_sha: ${{ github.event.inputs.base_sha }}
+          sha: ${{ github.event.inputs.sha }}
 
       - name: Deploy Challenges ke CTFd
         env:
           CTFD_URL: ${{ secrets.CTFD_URL }}
           CTFD_TOKEN: ${{ secrets.CTFD_TOKEN }}
+          MANUAL_DIR: ${{ github.event.inputs.challenge_dir }}
         run: |
           mkdir -p .ctf
           
-          # Biarkan [challenges] kosong agar ctfcli menganggap ini soal baru (stateless)
+          # Biarkan [challenges] kosong
           cat <<EOF > .ctf/config
           [config]
           url = $CTFD_URL
@@ -45,44 +64,38 @@ jobs:
           [challenges]
           EOF
 
-          FILES="${{ steps.changed-ctfd-files.outputs.all_changed_files }}"
-          IFS=',' read -r -a changed_files_array <<< "$FILES"
-          
-          declare -A UNIQUE_DIRS_MAP
-          
-          for file in "${changed_files_array[@]}"; do
-            [ -z "$file" ] && continue
-            
-            CHALL_DIR=$(echo "$file" | cut -d'/' -f1,2)
-            
-            if [ -f "$CHALL_DIR/challenge.yml" ]; then
-              UNIQUE_DIRS_MAP["$CHALL_DIR"]=1
-            fi
-          done
-
-          if [ ${#UNIQUE_DIRS_MAP[@]} -eq 0 ]; then
-            echo "ℹ️ Tidak ada perubahan pada file soal. Melewati tahap sync CTFd."
-            exit 0
-          fi
-
           echo "✅ Config Generated:"
           cat .ctf/config
 
-          # [FIX] Eksekusi dengan Strict Error Handling
-          for chall_dir in "${!UNIQUE_DIRS_MAP[@]}"; do
-            echo "----------------------------------------"
-            echo "🚀 Deploying ke CTFd: $chall_dir"
+          # Tentukan sumber direktori
+          DIRS="$MANUAL_DIR"
+          if [[ -z "$DIRS" ]]; then
+            DIRS="${{ steps.changed-dirs.outputs.all_changed_files }}"
+          fi
+
+          if [[ -z "$DIRS" ]]; then
+            echo "ℹ️ Tidak ada direktori soal yang diberikan. Melewati tahap sync CTFd."
+            exit 0
+          fi
+
+          # Looping aman untuk spasi
+          while IFS= read -r dir; do
+            [[ -z "$dir" ]] && continue
+            [[ ! -f "$dir/challenge.yml" ]] && continue
             
-            if ctf challenge sync "$chall_dir"; then
+            echo "----------------------------------------"
+            echo "🚀 Deploying ke CTFd: $dir"
+            
+            # Strict Error Handling
+            if ctf challenge sync "$dir"; then
               echo "✅ Berhasil Sync soal."
-            elif ctf challenge install "$chall_dir"; then
+            elif ctf challenge install "$dir"; then
               echo "✅ Berhasil Install soal baru."
             else
-              echo "❌ ERROR FATAL: Gagal melakukan sync atau install untuk $chall_dir!"
-              echo "❌ Pipeline dihentikan. Silakan cek log di atas untuk melihat respon API CTFd."
-              exit 1 # <--- Memastikan pipeline menjadi MERAH jika gagal
+              echo "❌ ERROR FATAL: Gagal melakukan sync atau install untuk $dir!"
+              exit 1 
             fi
-          done
+          done <<< "$DIRS"
 
   deploy-to-vps:
     name: Deploy Containers to VPS
@@ -94,33 +107,33 @@ jobs:
         with:
           fetch-depth: 0 
 
-      - name: Dapatkan daftar file yang berubah
-        id: changed-files
+      - name: Dapatkan daftar direktori yang berubah
+        id: changed-dirs
+        if: ${{ github.event.inputs.challenge_dir == '' }}
         uses: tj-actions/changed-files@v44
         with:
-          separator: ','
+          dir_names: "true"
+          dir_names_max_depth: "2"
+          separator: "\n"
+          base_sha: ${{ github.event.inputs.base_sha }}
+          sha: ${{ github.event.inputs.sha }}
 
       - name: Ekstrak direktori target Docker
         id: parse-dirs
+        env:
+          MANUAL_DIR: ${{ github.event.inputs.challenge_dir }}
         run: |
-          FILES="${{ steps.changed-files.outputs.all_changed_files }}"
-          IFS=',' read -r -a changed_files_array <<< "$FILES"
-          
-          declare -A UNIQUE_DIRS_MAP
-          
-          for file in "${changed_files_array[@]}"; do
-            [ -z "$file" ] && continue
-            CHALL_DIR=$(echo "$file" | cut -d'/' -f1,2)
-            
-            if [ -f "$CHALL_DIR/docker-compose.yml" ]; then
-              UNIQUE_DIRS_MAP["$CHALL_DIR"]=1
-            fi
-          done
-          
+          DIRS="$MANUAL_DIR"
+          if [[ -z "$DIRS" ]]; then
+            DIRS="${{ steps.changed-dirs.outputs.all_changed_files }}"
+          fi
+
           FINAL_DIRS=""
-          for dir in "${!UNIQUE_DIRS_MAP[@]}"; do
+          while IFS= read -r dir; do
+            [[ -z "$dir" ]] && continue
+            [[ ! -f "$dir/docker-compose.yml" ]] && continue
             FINAL_DIRS="${FINAL_DIRS}${dir}|"
-          done
+          done <<< "$DIRS"
           
           FINAL_DIRS=${FINAL_DIRS%|}
           
