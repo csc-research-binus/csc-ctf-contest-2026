@@ -1,0 +1,31 @@
+name: "gimmesbr"
+author: "rii."
+category: Reverse Engineering
+description: |
+  Neteflix locked the Steel Ball Run episodes behind a paywall and now everyone’s pissed. An insider leaked the Neteflix Key Validator… but it’s obfuscated like crazy. They knew people would try to break it.
+
+  ![SBR](https://ibb.co.com/dwFxD15S)
+
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: visible
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSC{G1v3_u5_M0r3_S7e3l_B4l1_RuN}"
+    type: statics
+tags:
+  - Reverse Engineering
+files: 
+  - dist/gimmesbr_v2
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
