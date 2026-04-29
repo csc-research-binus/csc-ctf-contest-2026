@@ -22,7 +22,7 @@ flags:
 tags:
   - Reverse Engineering
 files:
-- dist/source.zip
+  - dist/source.zip
 
 #kalo ada file ganti jadi
 # files :
