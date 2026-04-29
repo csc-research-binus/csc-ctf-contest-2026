@@ -26,7 +26,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -36,14 +36,14 @@ jobs:
       - name: Install ctfcli
         run: pip install ctfcli
 
-      - name: Dapatkan daftar direktori yang berubah
+      - name: Get changed directories
         id: changed-dirs
         if: ${{ github.event.inputs.challenge_dir == '' }}
         uses: tj-actions/changed-files@v44
         with:
           dir_names: "true"
           dir_names_max_depth: "2"
-          separator: "\n"
+          separator: "|"   # Lebih aman dari \n, tidak akan muncul di nama folder
           base_sha: ${{ github.event.inputs.base_sha }}
           sha: ${{ github.event.inputs.sha }}
 
@@ -52,50 +52,63 @@ jobs:
           CTFD_URL: ${{ secrets.CTFD_URL }}
           CTFD_TOKEN: ${{ secrets.CTFD_TOKEN }}
           MANUAL_DIR: ${{ github.event.inputs.challenge_dir }}
+          CHANGED_FILES: ${{ steps.changed-dirs.outputs.all_changed_files }}
         run: |
           mkdir -p .ctf
-          
-          # Biarkan [challenges] kosong
           cat <<EOF > .ctf/config
           [config]
           url = $CTFD_URL
           access_token = $CTFD_TOKEN
-          
+
           [challenges]
           EOF
 
-          echo "✅ Config Generated:"
-          cat .ctf/config
+          echo "✅ Config Generated"
 
           # Tentukan sumber direktori
-          DIRS="$MANUAL_DIR"
-          if [[ -z "$DIRS" ]]; then
-            DIRS="${{ steps.changed-dirs.outputs.all_changed_files }}"
+          if [[ -n "$MANUAL_DIR" ]]; then
+            # Manual input: sudah newline-separated langsung
+            DIRS_NL="$MANUAL_DIR"
+          else
+            # Changed files: separator "|", convert ke newline
+            DIRS_NL="${CHANGED_FILES//|/$'\n'}"
           fi
 
-          if [[ -z "$DIRS" ]]; then
-            echo "ℹ️ Tidak ada direktori soal yang diberikan. Melewati tahap sync CTFd."
+          if [[ -z "$DIRS_NL" ]]; then
+            echo "ℹ️ Tidak ada direktori yang berubah. Melewati CTFd sync."
             exit 0
           fi
 
-          # Looping aman untuk spasi
+          DEPLOYED=0
+          FAILED=0
+
           while IFS= read -r dir; do
             [[ -z "$dir" ]] && continue
             [[ ! -f "$dir/challenge.yml" ]] && continue
-            
+
             echo "----------------------------------------"
-            echo "🚀 Deploying ke CTFd: $dir"
-            
-            # Strict Error Handling
-            if ctf challenge sync "$dir"; then
-              echo "✅ Berhasil Sync soal."
+            echo "🚀 Processing: $dir"
+
+            # Push = update soal yang sudah ada di CTFd
+            # Install = tambah soal baru ke CTFd
+            # Coba push dulu, kalau gagal (belum ada) → install
+            if ctf challenge push "$dir" 2>/dev/null; then
+              echo "✅ Updated existing challenge: $dir"
+              DEPLOYED=$((DEPLOYED + 1))
             elif ctf challenge install "$dir"; then
-              echo "✅ Berhasil Install soal baru."
+              echo "✅ Installed new challenge: $dir"
+              DEPLOYED=$((DEPLOYED + 1))
             else
-              echo "❌ ERROR FATAL: Gagal melakukan sync atau install untuk $dir!"
-              exit 1 
+              echo "❌ FATAL: Gagal deploy $dir"
+              FAILED=$((FAILED + 1))
             fi
-          done <<< "$DIRS"
+
+          done <<< "$DIRS_NL"
+
+          echo "========================================"
+          echo "📊 Summary: $DEPLOYED deployed, $FAILED failed"
+          [[ $FAILED -gt 0 ]] && exit 1
+          exit 0
 
   deploy-to-vps:
     name: Deploy Containers to VPS
@@ -105,27 +118,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
-      - name: Dapatkan daftar direktori yang berubah
+      - name: Get changed directories
         id: changed-dirs
         if: ${{ github.event.inputs.challenge_dir == '' }}
         uses: tj-actions/changed-files@v44
         with:
           dir_names: "true"
           dir_names_max_depth: "2"
-          separator: "\n"
+          separator: "|"
           base_sha: ${{ github.event.inputs.base_sha }}
           sha: ${{ github.event.inputs.sha }}
 
-      - name: Ekstrak direktori target Docker
+      - name: Parse Docker target dirs
         id: parse-dirs
         env:
           MANUAL_DIR: ${{ github.event.inputs.challenge_dir }}
+          CHANGED_FILES: ${{ steps.changed-dirs.outputs.all_changed_files }}
         run: |
-          DIRS="$MANUAL_DIR"
-          if [[ -z "$DIRS" ]]; then
-            DIRS="${{ steps.changed-dirs.outputs.all_changed_files }}"
+          if [[ -n "$MANUAL_DIR" ]]; then
+            DIRS_NL="$MANUAL_DIR"
+          else
+            DIRS_NL="${CHANGED_FILES//|/$'\n'}"
           fi
 
           FINAL_DIRS=""
@@ -133,12 +148,11 @@ jobs:
             [[ -z "$dir" ]] && continue
             [[ ! -f "$dir/docker-compose.yml" ]] && continue
             FINAL_DIRS="${FINAL_DIRS}${dir}|"
-          done <<< "$DIRS"
-          
-          FINAL_DIRS=${FINAL_DIRS%|}
-          
+          done <<< "$DIRS_NL"
+
+          FINAL_DIRS="${FINAL_DIRS%|}"
           echo "CHALL_DIRS=$FINAL_DIRS" >> $GITHUB_ENV
-          echo "Direktori terdeteksi: $FINAL_DIRS"
+          echo "Direktori Docker terdeteksi: $FINAL_DIRS"
 
       - name: Deploy Container via SSH
         if: env.CHALL_DIRS != ''
@@ -151,23 +165,24 @@ jobs:
           envs: CHALL_DIRS
           script: |
             CTF_DIR="/home/ctfdeploy/csc-ctf-production/chall"
-            cd $CTF_DIR
-            
+            cd "$CTF_DIR"
+
             echo "📦 Pulling update terbaru dari Git..."
             git pull origin main
 
             IFS='|' read -r -a dir_array <<< "$CHALL_DIRS"
 
             for dir in "${dir_array[@]}"; do
-              [ -z "$dir" ] && continue
-              
+              [[ -z "$dir" ]] && continue
+
               echo "----------------------------------------"
               echo "🔄 Restarting Container: $dir"
+
               if [ -d "$CTF_DIR/$dir" ]; then
                 cd "$CTF_DIR/$dir"
                 docker compose down --remove-orphans
                 docker compose up -d --build
-                cd $CTF_DIR
+                cd "$CTF_DIR"
               else
                 echo "⚠️ Folder $dir tidak ditemukan di VPS!"
               fi
