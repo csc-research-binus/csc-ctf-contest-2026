@@ -1,0 +1,33 @@
+name: "bagi password wifi dong"
+author: "IndraSM"
+category: Forensic
+description: |
+  jadi kemarin temenku abis ke rumah saudaranya. Mau numpang internetan gratis tapi malah disuruh cari sendiri passwordnya, 
+  akhirnya sekalian dicoba deh ambil historynya. Eh tapi kok ada file yang dikunci dan passwordnya disembunyikan pake code angka dan huruf. untung kodenya berhasil diambil, Coba deh bantuin cari isinya apa.
+
+  Format flag : CSCCTF{...}
+
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: hidden
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSCCTF{karena_semua_soal_milik_yang_maha_kuasa_Sx3Jvb718s}"
+    type: statics
+tags:
+  - Forensic
+  - memory
+files: 
+- permisipaket.pcapng
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
