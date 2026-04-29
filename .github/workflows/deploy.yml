@@ -97,14 +97,14 @@ jobs:
             # 1. Coba sync metadata (update deskripsi, poin, kategori)
             if ctf challenge sync "$dir" 2>/dev/null; then
               echo "✅ Synced (Metadata updated): $dir"
-              # Selalu lakukan push untuk memastikan file attachment terbaru ter-upload
-              ctf challenge push "$dir" >/dev/null 2>&1
+              # Gunakan bypass (||) agar script tidak mati jika push file gagal
+              ctf challenge push "$dir" >/dev/null 2>&1 || echo "   ⚠️  Push file dilewati (Mungkin tidak ada attachment)"
               DEPLOYED=$((DEPLOYED + 1))
             
             # 2. Jika sync gagal (berarti soal belum terdaftar di CTFd), lakukan install
             elif ctf challenge install "$dir"; then
               echo "✅ Installed (Soal baru): $dir"
-              ctf challenge push "$dir" >/dev/null 2>&1
+              ctf challenge push "$dir" >/dev/null 2>&1 || echo "   ⚠️  Push file dilewati (Mungkin tidak ada attachment)"
               DEPLOYED=$((DEPLOYED + 1))
             
             # 3. Jika keduanya gagal
