@@ -22,7 +22,7 @@ flags:
 tags:
   - Miscellaneous
 files: 
-  - dist/source.jpeg
+  - source.jpeg
 
 #kalo ada file ganti jadi
 # files :
