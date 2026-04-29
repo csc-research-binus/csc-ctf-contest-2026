@@ -65,17 +65,22 @@ jobs:
 
           echo "✅ Config Generated"
 
-          # Tentukan sumber direktori
+          # Prioritas: manual input → changed files → scan semua folder
           if [[ -n "$MANUAL_DIR" ]]; then
-            # Manual input: sudah newline-separated langsung
+            echo "🎯 Mode: Manual dir"
             DIRS_NL="$MANUAL_DIR"
-          else
-            # Changed files: separator "|", convert ke newline
+
+          elif [[ -n "$CHANGED_FILES" ]]; then
+            echo "🔍 Mode: Changed files only"
             DIRS_NL="${CHANGED_FILES//|/$'\n'}"
+
+          else
+            echo "🌐 Mode: Full scan semua folder (tidak ada changed files)"
+            DIRS_NL=$(find . -name "challenge.yml" | sed 's|/challenge.yml||' | sed 's|^\./||')
           fi
 
           if [[ -z "$DIRS_NL" ]]; then
-            echo "ℹ️ Tidak ada direktori yang berubah. Melewati CTFd sync."
+            echo "ℹ️ Tidak ada soal ditemukan."
             exit 0
           fi
 
@@ -89,14 +94,11 @@ jobs:
             echo "----------------------------------------"
             echo "🚀 Processing: $dir"
 
-            # Push = update soal yang sudah ada di CTFd
-            # Install = tambah soal baru ke CTFd
-            # Coba push dulu, kalau gagal (belum ada) → install
             if ctf challenge push "$dir" 2>/dev/null; then
-              echo "✅ Updated existing challenge: $dir"
+              echo "✅ Updated: $dir"
               DEPLOYED=$((DEPLOYED + 1))
             elif ctf challenge install "$dir"; then
-              echo "✅ Installed new challenge: $dir"
+              echo "✅ Installed baru: $dir"
               DEPLOYED=$((DEPLOYED + 1))
             else
               echo "❌ FATAL: Gagal deploy $dir"
