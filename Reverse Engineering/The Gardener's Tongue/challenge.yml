@@ -21,7 +21,8 @@ flags:
     type: statics
 tags:
   - Reverse Engineering
-files: dist/source.zip
+files:
+- dist/source.zip
 
 #kalo ada file ganti jadi
 # files :
