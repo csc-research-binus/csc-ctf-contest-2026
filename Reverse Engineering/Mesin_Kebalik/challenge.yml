@@ -18,7 +18,6 @@ flags:
   - content: "CSC{i_hacked_the_binary}"
     type: static
 tags:
-  - Reverse Engineering
   - Easy
 files:
   - dist/chall.exe
