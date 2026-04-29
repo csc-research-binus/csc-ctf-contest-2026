@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Penting agar bisa membandingkan file yang berubah
+          fetch-depth: 0 
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -26,6 +26,8 @@ jobs:
       - name: Dapatkan daftar file yang berubah
         id: changed-ctfd-files
         uses: tj-actions/changed-files@v44
+        with:
+          separator: ',' # [FIX] Gunakan koma sebagai pemisah, bukan spasi
 
       - name: Deploy Challenges ke CTFd
         env:
@@ -34,7 +36,6 @@ jobs:
         run: |
           mkdir -p .ctf
           
-          # Buat header config dasar
           cat <<EOF > .ctf/config
           [config]
           url = $CTFD_URL
@@ -43,36 +44,40 @@ jobs:
           [challenges]
           EOF
 
-          # Logika mencari folder soal (level 2) dari file yang berubah
-          DIRS=""
-          for file in ${{ steps.changed-ctfd-files.outputs.all_changed_files }}; do
-            # Potong path untuk mendapatkan 'kategori/nama-soal'
+          # [FIX] Ambil output dan ubah delimiter ke koma
+          FILES="${{ steps.changed-ctfd-files.outputs.all_changed_files }}"
+          IFS=',' read -r -a changed_files_array <<< "$FILES"
+          
+          # [FIX] Gunakan associative array Bash untuk menghapus duplikasi tanpa memecah spasi
+          declare -A UNIQUE_DIRS_MAP
+          
+          for file in "${changed_files_array[@]}"; do
+            [ -z "$file" ] && continue
+            
+            # Ekstrak 'kategori/nama-soal'
             CHALL_DIR=$(echo "$file" | cut -d'/' -f1,2)
             
-            # Cek apakah ini folder soal yang valid (punya challenge.yml)
             if [ -f "$CHALL_DIR/challenge.yml" ]; then
-              DIRS="$DIRS $CHALL_DIR"
+              UNIQUE_DIRS_MAP["$CHALL_DIR"]=1
             fi
           done
-          
-          # Hapus duplikasi folder
-          UNIQUE_DIRS=$(echo "$DIRS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
 
-          if [ -z "$UNIQUE_DIRS" ]; then
+          # Cek apakah array kosong
+          if [ ${#UNIQUE_DIRS_MAP[@]} -eq 0 ]; then
             echo "ℹ️ Tidak ada perubahan pada file soal. Melewati tahap sync CTFd."
             exit 0
           fi
 
-          # Tambahkan direktori yang berubah ke ctfcli config
-          for dir in $UNIQUE_DIRS; do
+          # Tambahkan direktori yang berubah ke config
+          for dir in "${!UNIQUE_DIRS_MAP[@]}"; do
             echo "$dir = $dir" >> .ctf/config
           done
 
           echo "✅ Config Generated:"
           cat .ctf/config
 
-          # Eksekusi Sync/Install hanya untuk soal yang berubah
-          for chall_dir in $UNIQUE_DIRS; do
+          # Eksekusi Sync/Install
+          for chall_dir in "${!UNIQUE_DIRS_MAP[@]}"; do
             echo "----------------------------------------"
             echo "🚀 Deploying ke CTFd: $chall_dir"
             ctf challenge sync "$chall_dir" || ctf challenge install "$chall_dir"
@@ -91,23 +96,37 @@ jobs:
       - name: Dapatkan daftar file yang berubah
         id: changed-files
         uses: tj-actions/changed-files@v44
+        with:
+          separator: ',' # [FIX] Gunakan koma
 
       - name: Ekstrak direktori target Docker
         id: parse-dirs
         run: |
-          DIRS=""
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+          FILES="${{ steps.changed-files.outputs.all_changed_files }}"
+          IFS=',' read -r -a changed_files_array <<< "$FILES"
+          
+          declare -A UNIQUE_DIRS_MAP
+          
+          for file in "${changed_files_array[@]}"; do
+            [ -z "$file" ] && continue
             CHALL_DIR=$(echo "$file" | cut -d'/' -f1,2)
             
-            # Hanya deploy jika ada docker-compose.yml di folder tersebut
             if [ -f "$CHALL_DIR/docker-compose.yml" ]; then
-              DIRS="$DIRS $CHALL_DIR"
+              UNIQUE_DIRS_MAP["$CHALL_DIR"]=1
             fi
           done
           
-          UNIQUE_DIRS=$(echo "$DIRS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
-          echo "CHALL_DIRS=$UNIQUE_DIRS" >> $GITHUB_ENV
-          echo "Direktori terdeteksi: $UNIQUE_DIRS"
+          # [FIX] Gabungkan direktori menggunakan delimiter pipe (|) untuk dikirim via SSH
+          FINAL_DIRS=""
+          for dir in "${!UNIQUE_DIRS_MAP[@]}"; do
+            FINAL_DIRS="${FINAL_DIRS}${dir}|"
+          done
+          
+          # Hapus pipe separator di akhir string
+          FINAL_DIRS=${FINAL_DIRS%|}
+          
+          echo "CHALL_DIRS=$FINAL_DIRS" >> $GITHUB_ENV
+          echo "Direktori terdeteksi: $FINAL_DIRS"
 
       - name: Deploy Container via SSH
         if: env.CHALL_DIRS != ''
@@ -125,12 +144,16 @@ jobs:
             echo "📦 Pulling update terbaru dari Git..."
             git pull origin main
 
-            for dir in $CHALL_DIRS; do
+            # [FIX] Parsing string environment variable dari GitHub Actions menggunakan pipe
+            IFS='|' read -r -a dir_array <<< "$CHALL_DIRS"
+
+            for dir in "${dir_array[@]}"; do
+              [ -z "$dir" ] && continue
+              
               echo "----------------------------------------"
               echo "🔄 Restarting Container: $dir"
               if [ -d "$CTF_DIR/$dir" ]; then
                 cd "$CTF_DIR/$dir"
-                # Menghapus container lama dan membangun ulang image agar perubahan source code masuk
                 docker compose down --remove-orphans
                 docker compose up -d --build
                 cd $CTF_DIR
