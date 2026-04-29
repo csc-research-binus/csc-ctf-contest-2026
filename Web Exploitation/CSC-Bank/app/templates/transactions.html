@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Mutasi Rekening{% endblock %}
+{% block content %}
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+  <div>
+    <h1 style="font-size:1.25rem;font-weight:600;color:var(--navy)">Mutasi Rekening</h1>
+    <p style="font-size:.85rem;color:var(--gray-500);margin-top:.2rem">{{ user.account_number }}</p>
+  </div>
+  <a href="/dashboard" class="btn btn-ghost btn-sm">← Kembali</a>
+</div>
+
+<div class="card">
+  <div class="card-hd">📊 Riwayat Transaksi</div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Keterangan</th>
+        <th>Jumlah</th>
+        <th>Tipe</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tx in user.transactions %}
+      <tr>
+        <td class="mono" style="color:var(--gray-400);font-size:.78rem">{{ tx.id }}</td>
+        <td>{{ tx.desc }}</td>
+        <td style="font-weight:600;color:{% if tx.type == 'credit' %}var(--green){% else %}var(--red){% endif %}">
+          {% if tx.type == 'credit' %}+{% endif %}Rp{{ "{:,}".format(tx.amount | abs) }}
+        </td>
+        <td><span class="badge badge-{{ tx.type }}">{{ tx.type }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card" style="background:var(--gray-50)">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <div>
+      <div style="font-size:.75rem;color:var(--gray-500);margin-bottom:.3rem">Saldo saat ini</div>
+      <div style="font-size:1.3rem;font-weight:700;color:var(--navy)">Rp{{ "{:,}".format(user.balance) }}</div>
+    </div>
+    <span class="badge badge-user" style="font-size:.78rem">{{ user.username }}</span>
+  </div>
+</div>
+{% endblock %}
