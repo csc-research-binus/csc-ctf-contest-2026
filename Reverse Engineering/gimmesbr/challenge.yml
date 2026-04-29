@@ -20,7 +20,7 @@ flags:
   - content: "CSC{G1v3_u5_M0r3_S7e3l_B4l1_RuN}"
     type: static
 tags:
-  - Reverse Engineering
+  - Easy
 files: 
   - dist/gimmesbr_v2
 

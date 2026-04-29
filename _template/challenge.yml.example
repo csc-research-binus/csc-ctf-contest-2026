@@ -18,7 +18,7 @@ flags:
   - content: "CSC{flag}"
     type: static
 tags:
-  - Miscellaneous (ganti sesuai kategori soal)
+  - easy (ganti sesuai difficulty soal)
 files: []
 
 #kalo ada file ganti jadi
