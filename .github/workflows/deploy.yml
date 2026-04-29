@@ -9,14 +9,11 @@ on:
         description: 'Force one challenge dir, e.g. Reverse Engineering/gimmesbr'
         required: false
         type: string
-      base_sha:
-        description: 'Optional diff base SHA'
+      force_all:
+        description: 'Force deploy ALL challenges (Ignore git diff)'
         required: false
-        type: string
-      sha:
-        description: 'Optional diff target SHA'
-        required: false
-        type: string
+        type: boolean
+        default: false
 
 jobs:
   sync-to-ctfd:
@@ -38,20 +35,20 @@ jobs:
 
       - name: Get changed directories
         id: changed-dirs
-        if: ${{ github.event.inputs.challenge_dir == '' }}
+        # Hanya cari changed files jika manual dir kosong DAN force_all tidak dicentang
+        if: ${{ github.event.inputs.challenge_dir == '' && github.event.inputs.force_all != 'true' }}
         uses: tj-actions/changed-files@v44
         with:
           dir_names: "true"
           dir_names_max_depth: "2"
-          separator: "|"   # Lebih aman dari \n, tidak akan muncul di nama folder
-          base_sha: ${{ github.event.inputs.base_sha }}
-          sha: ${{ github.event.inputs.sha }}
+          separator: "|"
 
       - name: Deploy Challenges ke CTFd
         env:
           CTFD_URL: ${{ secrets.CTFD_URL }}
           CTFD_TOKEN: ${{ secrets.CTFD_TOKEN }}
           MANUAL_DIR: ${{ github.event.inputs.challenge_dir }}
+          FORCE_ALL: ${{ github.event.inputs.force_all }}
           CHANGED_FILES: ${{ steps.changed-dirs.outputs.all_changed_files }}
         run: |
           mkdir -p .ctf
@@ -65,50 +62,60 @@ jobs:
 
           echo "✅ Config Generated"
 
-          # Prioritas: manual input → changed files → scan semua folder
+          # Prioritas: manual input -> force all -> changed files
           if [[ -n "$MANUAL_DIR" ]]; then
             echo "🎯 Mode: Manual dir"
-            DIRS_NL="$MANUAL_DIR"
-
+            IFS='|' read -r -a DIRS_ARRAY <<< "$MANUAL_DIR"
+          elif [[ "$FORCE_ALL" == "true" ]]; then
+            echo "🌐 Mode: Full scan (Force deploy ALL)"
+            # Ambil semua folder yang punya challenge.yml dan gabungkan dengan '|'
+            ALL_DIRS=$(find . -name "challenge.yml" -exec dirname {} \; | sed 's|^\./||' | paste -sd "|" -)
+            IFS='|' read -r -a DIRS_ARRAY <<< "$ALL_DIRS"
           elif [[ -n "$CHANGED_FILES" ]]; then
             echo "🔍 Mode: Changed files only"
-            DIRS_NL="${CHANGED_FILES//|/$'\n'}"
-
+            IFS='|' read -r -a DIRS_ARRAY <<< "$CHANGED_FILES"
           else
-            echo "🌐 Mode: Full scan semua folder (tidak ada changed files)"
-            DIRS_NL=$(find . -name "challenge.yml" | sed 's|/challenge.yml||' | sed 's|^\./||')
+            echo "ℹ️ Tidak ada modifikasi soal pada commit ini."
+            exit 0
           fi
 
-          if [[ -z "$DIRS_NL" ]]; then
-            echo "ℹ️ Tidak ada soal ditemukan."
+          if [[ ${#DIRS_ARRAY[@]} -eq 0 ]]; then
+            echo "ℹ️ List direktori kosong."
             exit 0
           fi
 
           DEPLOYED=0
           FAILED=0
 
-          while IFS= read -r dir; do
+          for dir in "${DIRS_ARRAY[@]}"; do
             [[ -z "$dir" ]] && continue
             [[ ! -f "$dir/challenge.yml" ]] && continue
 
             echo "----------------------------------------"
             echo "🚀 Processing: $dir"
 
-            if ctf challenge push "$dir" 2>/dev/null; then
-              echo "✅ Updated: $dir"
+            # 1. Coba sync metadata (update deskripsi, poin, kategori)
+            if ctf challenge sync "$dir" 2>/dev/null; then
+              echo "✅ Synced (Metadata updated): $dir"
+              # Selalu lakukan push untuk memastikan file attachment terbaru ter-upload
+              ctf challenge push "$dir" >/dev/null 2>&1
               DEPLOYED=$((DEPLOYED + 1))
+            
+            # 2. Jika sync gagal (berarti soal belum terdaftar di CTFd), lakukan install
             elif ctf challenge install "$dir"; then
-              echo "✅ Installed baru: $dir"
+              echo "✅ Installed (Soal baru): $dir"
+              ctf challenge push "$dir" >/dev/null 2>&1
               DEPLOYED=$((DEPLOYED + 1))
+            
+            # 3. Jika keduanya gagal
             else
-              echo "❌ FATAL: Gagal deploy $dir"
+              echo "❌ FATAL: Gagal memproses $dir"
               FAILED=$((FAILED + 1))
             fi
-
-          done <<< "$DIRS_NL"
+          done
 
           echo "========================================"
-          echo "📊 Summary: $DEPLOYED deployed, $FAILED failed"
+          echo "📊 Summary: $DEPLOYED sukses, $FAILED gagal"
           [[ $FAILED -gt 0 ]] && exit 1
           exit 0
 
@@ -122,35 +129,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get changed directories
-        id: changed-dirs
-        if: ${{ github.event.inputs.challenge_dir == '' }}
-        uses: tj-actions/changed-files@v44
-        with:
-          dir_names: "true"
-          dir_names_max_depth: "2"
-          separator: "|"
-          base_sha: ${{ github.event.inputs.base_sha }}
-          sha: ${{ github.event.inputs.sha }}
-
       - name: Parse Docker target dirs
         id: parse-dirs
         env:
           MANUAL_DIR: ${{ github.event.inputs.challenge_dir }}
-          CHANGED_FILES: ${{ steps.changed-dirs.outputs.all_changed_files }}
+          FORCE_ALL: ${{ github.event.inputs.force_all }}
+          CHANGED_FILES: ${{ needs.sync-to-ctfd.outputs.changed_files || '' }}
         run: |
+          # Dapatkan ulang changed files secara manual menggunakan Git diff
+          # karena output dari job sebelumnya sulit di-passing jika job kondisional
           if [[ -n "$MANUAL_DIR" ]]; then
-            DIRS_NL="$MANUAL_DIR"
+            TARGET_DIRS="$MANUAL_DIR"
+          elif [[ "$FORCE_ALL" == "true" ]]; then
+            TARGET_DIRS=$(find . -name "docker-compose.yml" -exec dirname {} \; | sed 's|^\./||' | paste -sd "|" -)
           else
-            DIRS_NL="${CHANGED_FILES//|/$'\n'}"
+            TARGET_DIRS=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '/' | cut -d'/' -f1,2 | sort -u | paste -sd "|" -)
           fi
 
           FINAL_DIRS=""
-          while IFS= read -r dir; do
+          IFS='|' read -r -a DIRS_ARRAY <<< "$TARGET_DIRS"
+          for dir in "${DIRS_ARRAY[@]}"; do
             [[ -z "$dir" ]] && continue
             [[ ! -f "$dir/docker-compose.yml" ]] && continue
             FINAL_DIRS="${FINAL_DIRS}${dir}|"
-          done <<< "$DIRS_NL"
+          done
 
           FINAL_DIRS="${FINAL_DIRS%|}"
           echo "CHALL_DIRS=$FINAL_DIRS" >> $GITHUB_ENV
