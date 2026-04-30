@@ -1,0 +1,29 @@
+name: "my mbg"
+author: "senz"
+category: Reverse Engineering
+description: |
+  the calculator program is leaked? lets see if there is something sketchy with the anggaran.
+
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: visible
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSC{eV3n_1f+tHe_cHunk_iS_h34v!ly_0bf4sc4t3d+tH3_d3c0d3r_!s+c0MPl3tELy_n4k3D}"
+    type: static
+tags:
+  - medium
+files: 
+  - dist/calc.lua
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
