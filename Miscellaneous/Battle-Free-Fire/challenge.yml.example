@@ -1,0 +1,30 @@
+name: "Battle Free Fire"
+author: "yaaoware"
+category: Miscellaneous
+description: |
+  Aku sedang bermain game tembak tembakan, waktu di lobby jaringan aku ngelag banget guys jadi nya aku coba reconnecting deh sampai berhasil... 
+  Setelah in game, aku kaget kok gada siapa siapa ya ? aku kayaknya kepisah deh...
+
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: visible
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSC{Stadium}"
+    type: static
+tags:
+  - easy
+files:
+  - source.png
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
