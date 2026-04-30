@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Masuk{% endblock %}
+{% block content %}
+<div style="max-width:400px;margin:2.5rem auto">
+
+  <div style="text-align:center;margin-bottom:1.75rem">
+    <div style="width:56px;height:56px;background:var(--navy);border-radius:14px;display:inline-grid;place-items:center;font-size:24px;margin-bottom:.875rem">🏦</div>
+    <h1 style="font-size:1.3rem;font-weight:600;color:var(--navy)">Masuk ke CSC Bank</h1>
+    <p style="font-size:.85rem;color:var(--gray-500);margin-top:.3rem">Selamat datang kembali</p>
+  </div>
+
+  <div class="card">
+    {% if error %}
+    <div class="alert alert-danger" style="margin-bottom:1.1rem">
+      <span class="alert-icon">✕</span>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="/login">
+      <div style="margin-bottom:1rem">
+        <label class="lbl" for="username">Username</label>
+        <input class="inp" type="text" id="username" name="username" placeholder="Masukkan username" autocomplete="username" required>
+      </div>
+      <div style="margin-bottom:1.5rem">
+        <label class="lbl" for="password">Password</label>
+        <input class="inp" type="password" id="password" name="password" placeholder="Masukkan password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;padding:11px">Masuk →</button>
+    </form>
+
+    <div style="text-align:center;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--gray-100);font-size:.83rem;color:var(--gray-500)">
+      Belum punya akun? <a href="/register" style="color:var(--blue);font-weight:500">Daftar gratis</a>
+    </div>
+  </div>
+
+  <p style="text-align:center;font-size:.75rem;color:var(--gray-400);margin-top:1.25rem">
+    Butuh bantuan? Hubungi <span style="color:var(--blue)">support@cscbank.id</span>
+  </p>
+</div>
+{% endblock %}
