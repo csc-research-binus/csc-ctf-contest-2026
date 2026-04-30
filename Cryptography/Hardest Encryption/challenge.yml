@@ -1,0 +1,24 @@
+name: Hardest Encryption
+author: Reichata
+category: Cryptography
+description: |
+  I want to make the hardest encryption in this world by doing multiple encryption. why no one done this yet?
+
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: hidden
+
+flags:
+  - content: "CSC{w0w-I-l34rn3d-7h4t-f4ls3-5en53-0f-53cur1ty-3x15t}"
+    type: static
+tags:
+  - easy
+files: 
+- dist/encryption.py
+- dist/encrypted_flag.txt
+
+hints: []
