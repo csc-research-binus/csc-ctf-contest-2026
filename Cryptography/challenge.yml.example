@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: "nama soal"
 author: "darflashxd"
 category: Miscellaneous
@@ -25,4 +26,33 @@ files: []
 # files :
 # - nama file
 
+=======
+name: "nama soal"
+author: "nama author"
+category: Miscellaneous (ganti sesuai kategori soal)
+description: |
+  deskripsi soal
+
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: visible
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSC{flag}"
+    type: static
+tags:
+  - easy (ganti sesuai difficulty soal)
+files: []
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+>>>>>>> a22c663446ee5dd6dbe07cf8dcb74ff04409798e
 hints: [] #hints gausah di isi

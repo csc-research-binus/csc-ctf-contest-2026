@@ -1,0 +1,29 @@
+name: "Mesin Kebalik"
+author: "Piwww"
+category: Reverse Engineering
+description: |
+  Sebuah file binary yang tampaknya meminta input berupa "Admin Key". Namun, tujuan utama dari challenge ini adalah untuk menganalisis binary tersebut menggunakan teknik reverse engineering untuk menemukan flag yang tersembunyi di dalamnya.
+
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: visible
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSC{i_hacked_the_binary}"
+    type: static
+tags:
+  - Easy
+files:
+  - dist/chall.exe
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
