@@ -1,0 +1,27 @@
+name: "Travel Log"
+author: "sena`"
+category: crypto
+description: |
+  A traveler left a note before disappearing in Mondstadt: 
+  "This mechanism will only respond to the sacred words carved at the feet of the Anemo Archon. But its exact location has been obscured in the map variable." 
+
+  id_hex = 0x3C37B6FDACF9C6F138F
+
+  If you've found the variable, you will insert it in {input_here}. Use the Interactive Map link to find its location:
+  https://act.hoyolab.com/ys/app/interactive-map/index.html?lang=en-us&bbs_presentation_style=no_header#/map/2?share_id={input_here}-9acb8bb1-0842-4a3c-81d4-dfa68116dfb2&index=33&share_type=markers
+
+  Once you’ve entered the right link, you will find weird engravings for you to decode, again.
+
+value: 500
+type: standard
+state: hidden
+
+flags:
+  - flag: "CSC{Th3_G4t3w4y_0f_C3l3st14}"
+    type: static
+
+tags:
+  - cipher
+  - encoding
+
+files: []
