@@ -2,8 +2,8 @@ name: "Travel Log"
 author: "sena`"
 category: crypto
 description: |
-  A traveler left a note before disappearing in Mondstadt: 
-  "This mechanism will only respond to the sacred words carved at the feet of the Anemo Archon. But its exact location has been obscured in the map variable." 
+  A traveler left a note before disappearing in Mondstadt:
+  "This mechanism will only respond to the sacred words carved at the feet of the Anemo Archon. But its exact location has been obscured in the map variable."
 
   id_hex = 0x3C37B6FDACF9C6F138F
 
@@ -17,7 +17,7 @@ type: standard
 state: hidden
 
 flags:
-  - flag: "CSC{Th3_G4t3w4y_0f_C3l3st14}"
+  - content: "CSC{Th3_G4t3w4y_0f_C3l3st14}"
     type: static
 
 tags:
