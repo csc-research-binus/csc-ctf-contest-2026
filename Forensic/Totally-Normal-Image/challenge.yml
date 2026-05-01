@@ -1,0 +1,29 @@
+name: "Totally Normal Image"
+author: "Erlangga"
+category: Forensic
+description: |
+  Gambar ini terlihat biasa saja.
+  Tapi apakah kamu yakin tidak ada sesuatu yang tersembunyi di dalamnya?
+
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: hidden
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSC{4nd4_m3n3muk4n_fl49_ny4}"
+    type: static
+tags:
+  - easy
+files: []
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
