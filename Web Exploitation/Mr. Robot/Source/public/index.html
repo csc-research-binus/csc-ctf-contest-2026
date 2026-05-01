@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Page</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Login</h1>
+        <p class="subtitle">Silakan login untuk melanjutkan</p>
+      </div>
+
+      <div class="form-container">
+        <!-- Form Login -->
+        <form id="loginForm">
+          <div class="input-group">
+            <label for="login-username">Username atau Email</label>
+            <input type="text" id="login-username" placeholder="Masukkan username atau email" required />
+          </div>
+
+          <div class="input-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" placeholder="Masukkan password" required />
+            <span class="toggle-password" onclick="togglePassword('login-password')">👁️</span>
+          </div>
+
+          <button type="submit" class="btn-primary">Login</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
