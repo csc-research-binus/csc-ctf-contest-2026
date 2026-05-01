@@ -1,0 +1,23 @@
+name: "One Step Message"
+author: "Aswelarom"
+category: crypto
+description: |
+  Seorang Mahasiswa ingin mengirim pesan rahasia ke temannya.
+  Berikut pesan yang berhasil ditemukan:
+  CSC{Uifsf_Jt_Opuijoh_Tfdsfu}
+  Bisakah kamu mengembalikan pesan aslinya?
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: hidden
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSC{Uifsf_Jt_Opuijoh_Tfdsfu}"
+    type: static
+tags:
+  - easy
+files: []
