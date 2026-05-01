@@ -1,0 +1,32 @@
+name: "Nge-Hash Lagi?"
+author: "Irsyad"
+category: Cryptography
+description: |
+  Someone on the team once said:
+  "Relax bro, it's just a hash. Should take like 5 seconds."
+
+  30 minutes later...
+  still staring at the screen.
+
+  All that was left was a single hash string.
+  No context, no files, no extra clues.
+  Classic.
+
+  But honestly...
+  if it's really that easy, why are you still here?
+
+  Maybe the hash isn't the problem.
+  Maybe... the way you're looking at it is.
+
+  Flag format: CSC{...}
+
+value: 500 #jangan di ganti
+type: standard         
+flags:
+  - flag: "CSC{3m4n9_1ni_Fl49_ny4}"
+    type: static
+tags:
+  - cryptography
+  - hash
+files:
+  - dist/hash.txt
