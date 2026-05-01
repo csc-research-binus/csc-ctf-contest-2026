@@ -16,7 +16,7 @@ state: hidden
 # JANGAN DI UBAH
 
 flags:
-  - content: "CSC{Uifsf_Jt_Opuijoh_Tfdsfu}"
+  - content: "CSC{There_Is_Nothing_Secret}"
     type: static
 tags:
   - easy
