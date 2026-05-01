@@ -1,6 +1,6 @@
 name: "One Step Message"
 author: "Aswelarom"
-category: crypto
+category: Cryptography
 description: |
   Seorang Mahasiswa ingin mengirim pesan rahasia ke temannya.
   Berikut pesan yang berhasil ditemukan:
@@ -12,7 +12,7 @@ extra:
   initial: 500
   decay: 30
   minimum: 100
-state: hidden
+state: visible
 # JANGAN DI UBAH
 
 flags:
