@@ -1,0 +1,32 @@
+name: "Mr. Invisible"
+author: "heiriko"
+category: Miscellaneous
+description: |
+  We managed to download a backup folder from a developer at a rival firm. 
+  He's known for being paranoid thinking way out of the box when hiding something. 
+  Our field agent says he was talking about "reading between the lines." 
+  See if you can find what he’s hiding..
+
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: visible
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSC{This_is_your_Flag}"
+    type: static
+tags:
+  - medium
+files: 
+  - dist\Problem.7z
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
