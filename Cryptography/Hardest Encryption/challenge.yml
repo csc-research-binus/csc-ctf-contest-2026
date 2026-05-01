@@ -1,5 +1,5 @@
-name: Hardest Encryption
-author: Reichata
+name: "Hardest Encryption"
+author: "Reichata"
 category: Cryptography
 description: |
   I want to make the hardest encryption in this world by doing multiple encryption. why no one done this yet?
@@ -18,7 +18,7 @@ flags:
 tags:
   - easy
 files: 
-- dist/encryption.py
-- dist/encrypted_flag.txt
+  - dist/encryption.py
+  - dist/encrypted_flag.txt
 
 hints: []
