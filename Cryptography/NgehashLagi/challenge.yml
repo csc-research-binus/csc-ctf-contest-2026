@@ -21,15 +21,21 @@ description: |
 
   Flag format: CSC{...}
 
-value: 500 #jangan di ganti
-type: standard         
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: visible
+# JANGAN DI UBAH
+
 flags:
-  - flag: "CSC{password1}"
+  - content: "CSC{password1}"
     type: static
 tags:
   - cryptography
   - hash
 files:
   - dist/hash.txt
-
-state: hidden
