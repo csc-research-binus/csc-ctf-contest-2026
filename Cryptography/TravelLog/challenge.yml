@@ -12,16 +12,25 @@ description: |
 
   Once you’ve entered the right link, you will find weird engravings for you to decode, again.
 
+# JANGAN DI UBAH
+type: dynamic
 value: 500
-type: standard
-state: hidden
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: visible
+# JANGAN DI UBAH
 
 flags:
   - content: "CSC{Th3_G4t3w4y_0f_C3l3st14}"
     type: static
-
 tags:
-  - cipher
-  - encoding
-
+  - Easy
 files: []
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
