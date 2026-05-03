@@ -1,0 +1,13 @@
+name: "Gone Dark"
+author: "Noir"
+category: misc
+description: |
+  A cryptographer was investigating something he shouldn't have. In September 2020, he quietly rotated his keys on a dark web site. His last attempt to stay hidden. His username on a well-known dark web forum is the last 25 characters of his new key's fingerprint. He was never heard from again. All that remains is one final post titled "If I disappear, start here". A photo from his favorite album, the place investigators believe he fled to. Find him before it's too late!
+value: 500
+type: standard
+flags:
+  - flag: "CSC{KRANKENHAUS_KOLMANSKOP_7D6D036C2ED1E8E}"
+    type: static
+tags:
+  - misc
+files: []
