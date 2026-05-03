@@ -1,0 +1,29 @@
+name: "kalah-lagi, kalah-lagi"
+author: "ramothy"
+category: Forensic
+description: |
+  Ini team kalah mulu dah, heran deh liatnya
+
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: hidden
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSC{rRQ_6@k_LolO$_pl@Y0FF_:(}"
+    type: static
+tags:
+  - easy
+files:
+  - chall.zip
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
