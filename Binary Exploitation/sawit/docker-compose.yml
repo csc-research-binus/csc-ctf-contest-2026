@@ -1,0 +1,6 @@
+services:
+  sawit-pwn:
+    build: .
+    ports:
+      - "50004:50004"
+    restart: unless-stopped
