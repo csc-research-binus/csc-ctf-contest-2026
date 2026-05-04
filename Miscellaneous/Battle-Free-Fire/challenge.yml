@@ -3,7 +3,9 @@ author: "yaaoware"
 category: Miscellaneous
 description: |
   Aku sedang bermain game tembak tembakan, waktu di lobby jaringan aku ngelag banget guys jadi nya aku coba reconnecting deh sampai berhasil... 
-  Setelah in game, aku kaget kok gada siapa siapa ya ? aku kayaknya kepisah deh...
+  Setelah in game, aku kaget kok gada siapa siapa ya ? aku kayaknya kepisah deh... 
+
+  FORMAT : CSC{NamaTempatAkuSekarang}
 
 # JANGAN DI UBAH
 type: dynamic
