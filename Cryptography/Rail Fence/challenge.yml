@@ -1,0 +1,35 @@
+name: "zigy-zaga"
+author: "Irsyad"
+category: Cryptography
+description: |
+
+  Sebuah pesan berjalan tanpa arah yang pasti—
+  naik, turun, lalu kembali lagi, seolah tersesat dalam jalurnya sendiri.
+
+  Sekilas terlihat kacau.
+  Namun kekacauan itu… terasa terlalu teratur.
+
+  Apakah kamu melihat polanya?
+  Atau hanya mengikuti garis lurus yang menyesatkan?
+
+  Tidak semua pesan disembunyikan dengan cara rumit.
+  Terkadang, cukup dengan mengubah jalurnya.
+
+  Ikuti ritmenya.
+  Naik. Turun. Ulangi.
+
+  Dan mungkin… pesan itu akan menemukanmu kembali.
+
+value: 500
+type: standard
+flags:
+  - flag: "CSC{m3n4ng_c0nt3st_d4ftar_cbc}"
+    type: static
+tags:
+  - cryptography
+  - rail-fence
+  - transposition
+files:
+  - dist/message.txt
+
+state: hidden
