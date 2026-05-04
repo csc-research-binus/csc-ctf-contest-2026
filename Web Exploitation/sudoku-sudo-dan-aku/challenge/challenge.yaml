@@ -1,0 +1,24 @@
+name: Sudoku Sudo dan Aku
+category: Web Exploitation
+difficulty: Easy
+author: Roy Guami Lasjordien
+
+description: |
+  Gatau dah ini game ribet banget, cobain main sendiri aja lah dulu..
+
+flags:
+  - CSC{Ga tau lah pokoknya ini flag}
+
+tags:
+  - xss
+  - reflected-xss
+  - dom-xss
+  - javascript
+  - client-side
+
+files:
+  - src/index.html
+
+state: visible
+
+version: "1.0"
