@@ -10,7 +10,7 @@ extra:
   initial: 500
   decay: 30
   minimum: 100
-state: hidden
+state: visible
 
 flags:
   - content: "CSC{w0w-I-l34rn3d-7h4t-f4ls3-5en53-0f-53cur1ty-3x15t}"
