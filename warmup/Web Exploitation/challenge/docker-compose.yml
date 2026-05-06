@@ -1,0 +1,8 @@
+services:
+  warmup-web:
+    build: .
+    image: csc-warmup-web:latest
+    container_name: csc_warmup_web
+    ports:
+      - "60001:80"
+    restart: unless-stopped
