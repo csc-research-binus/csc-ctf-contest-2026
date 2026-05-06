@@ -1,0 +1,29 @@
+name: "Reverse Warmup"
+category: Reverse Engineering
+description: |-
+  Hey I'm making a password check python script, I think the algorithm has been taught by lecturers in the regular binus lecture class. Can you crack it though?
+
+  Author: Lyo
+
+# connection_info: 
+
+##### DON'T CHANGE
+value: 500
+type: dynamic
+extra:
+    initial: 500
+    decay: 30
+    minimum: 100
+##### DON'T CHANGE
+
+flags:
+  - CSC{G0od_Lu7k_T0morr0w_Guy2}
+
+files:
+ - dist/chall.py
+
+tags:
+  - warmup
+
+state: visible
+
