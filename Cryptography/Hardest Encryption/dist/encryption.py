@@ -18,10 +18,8 @@ for flagindex in range(len(flag)):
             encrypted_flag += randomdictionary[dictionaryindex]
             break
 
-encrypted_flag = [(ord(each_character) + randomnumber) % 10000 for each_character in encrypted_flag]
+encrypted_flag = [(ord(encrypted_flag[index]) + randomnumber + index) % 10000 for index in range(len(encrypted_flag))]
 
 encrypted_flag = [(each_integer ^ randomnumber) for each_integer in encrypted_flag]
-
-
 
 print(f"here is the final flag: {encrypted_flag}")
