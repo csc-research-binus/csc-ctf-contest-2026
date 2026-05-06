@@ -2,7 +2,7 @@ name: "zigy-zaga"
 author: "Irsyad"
 category: Cryptography
 description: |
-
+  
   Sebuah pesan berjalan tanpa arah yang pasti—
   naik, turun, lalu kembali lagi, seolah tersesat dalam jalurnya sendiri.
 
@@ -20,16 +20,26 @@ description: |
 
   Dan mungkin… pesan itu akan menemukanmu kembali.
 
+# JANGAN DI UBAH
+type: dynamic
 value: 500
-type: standard
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: visible
+# JANGAN DI UBAH
+
 flags:
-  - flag: "CSC{m3n4ng_c0nt3st_d4ftar_cbc}"
+  - content: "CSC{m3n4ng_c0nt3st_d4ftar_cbc}"
     type: static
 tags:
-  - cryptography
-  - rail-fence
-  - transposition
+  - Medium
 files:
   - dist/message.txt
 
-state: hidden
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
