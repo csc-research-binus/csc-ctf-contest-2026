@@ -1,0 +1,32 @@
+name: "Skibidi Invasion"
+category: Forensic
+description: |-
+  Diketahui, pasukan Skibidi Toilet merencanakan invasi ke file system kita.
+  Namun, seorang kameramen berhasil menyelipkan pesan rahasia ke dalam file gambar sebelum ditangkap.
+
+  Temukan pesan itu sebelum semuanya jadi... Skibidi-fied
+  
+  Author : darflashxd
+
+# connection_info: 
+
+##### DON'T CHANGE
+value: 500
+type: dynamic
+extra:
+    initial: 500
+    decay: 30
+    minimum: 100
+##### DON'T CHANGE
+
+flags:
+  - CSC{sk1b1d1_s19m4_m3w1n9_4ku_br4in120t} 
+
+tags:
+  - easy
+
+files:
+ - dist/skibidi.jpg
+
+state: visible
+

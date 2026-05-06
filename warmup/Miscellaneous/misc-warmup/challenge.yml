@@ -1,0 +1,31 @@
+name: "Misc Warmup"
+category: Misc
+description: |-
+  I miss the times when I was a scout boy on elementary school. Luckily I still store the audio record my teacher gave me. I think it contains a secret message, can you tell me what is it?
+
+  Notes: Wrap it with the flag format : CSC{...}
+
+  Author: Lyo
+
+# connection_info: 
+
+##### DON'T CHANGE
+value: 500
+type: dynamic
+extra:
+    initial: 500
+    decay: 30
+    minimum: 100
+##### DON'T CHANGE
+
+flags:
+  - CSC{K0D3M0RS3G3M1NK}
+
+files:
+ - dist/audio.wav
+
+tags:
+  - warmup
+
+state: visible
+
