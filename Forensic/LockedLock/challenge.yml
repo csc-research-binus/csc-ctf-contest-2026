@@ -2,15 +2,14 @@ name: "Locked Lock"
 author: "dorayaku"
 category: Forensic
 description: |
-  Adit seorang anak yang pintar, ia mendapatkan beasiswa dari SunibBank, namun
-  ia perlu membuat essay 500 kata dengan topik kepemimpinan dan harus dikumpul
-  dengan format zip. Akan tetapi essay yang ia buat tidak menyentuh 500 kata, 
-  sehingga ia meminta bantuan temannya, John. Setelah dibantu temannya, kondisi filenya
-  sudah dalam format zip, namun Adit penasaran apakah betul sudah 500 kata dan apa
-  yang ditambahkan oleh temannya hingga bisa menyentuh 500 kata. Akan tetapi, 
-  zip nya terkunci, kata John kuncinya ada di dalam file itu sendiri. Bisakah
-  kamu menolong Adit untuk membuka zipnya?
- 
+  si Adit ini anak ambis yang dapet beasiswa dari SunibBank. Tapi ada syaratnya,
+  dia wajib bikin esai soal kepemimpinan minimal 500 kata, trus dikumpulin dalam
+  format .zip. Masalahnya, si Adit mentok, tulisannya ngga nyampe 500 kata.
+  Akhirnya dia minta tolong temennya, John. Si John ngebantuin sampe filenya beres
+  dikompres jadi .zip. Tapi pas mau dicek lagi, Adit curiga "ini si John nambahin
+  apaan yak ampe jadi 500 kata". Pas mau dibuka, ternyata zipnya dipassword!!?
+  Si John cuman bilang "Kuncinya ada di dalem file itu sendiri".
+
 # JANGAN DI UBAH
 type: dynamic
 value: 500
