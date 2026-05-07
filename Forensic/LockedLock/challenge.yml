@@ -23,7 +23,7 @@ state: hidden
 
 flags:
   - content: "CSC{s3M0gA_D4pET_134515w4}"
-    type: statics
+    type: static
 tags:
   - Forensic
 files:
