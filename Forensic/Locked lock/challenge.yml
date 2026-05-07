@@ -1,0 +1,35 @@
+name: "Locked Lock"
+author: "dorayaku"
+category: Forensic
+description: |
+  si Adit ini anak ambis yang dapet beasiswa dari SunibBank. Tapi ada syaratnya,
+  dia wajib bikin esai soal kepemimpinan minimal 500 kata, trus dikumpulin dalam
+  format .zip. Masalahnya, si Adit mentok, tulisannya ngga nyampe 500 kata.
+  Akhirnya dia minta tolong temennya, John. Si John ngebantuin sampe filenya beres
+  dikompres jadi .zip. Tapi pas mau dicek lagi, Adit curiga "ini si John nambahin
+  apaan yak ampe jadi 500 kata". Pas mau dibuka, ternyata zipnya dipassword!!?
+  Si John cuman bilang "Kuncinya ada di dalem file itu sendiri".
+
+# JANGAN DI UBAH
+type: dynamic
+value: 500
+extra:
+  initial: 500
+  decay: 30
+  minimum: 100
+state: hidden
+# JANGAN DI UBAH
+
+flags:
+  - content: "CSC{s3M0gA_D4pET_134515w4}"
+    type: static
+tags:
+  - Forensic
+files:
+  - 29029029.zip
+
+#kalo ada file ganti jadi
+# files :
+# - nama file
+
+hints: [] #hints gausah di isi
