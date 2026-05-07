@@ -13,7 +13,7 @@ extra:
   initial: 500
   decay: 30
   minimum: 100
-state: visible
+state: hidden
 # JANGAN DI UBAH
 
 flags:
