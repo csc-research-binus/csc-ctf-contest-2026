@@ -168,11 +168,16 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           envs: CHALL_DIRS
           script: |
+            # 1. Tambahkan set -e agar workflow langsung gagal jika ada command yang error
+            set -e
+            
             CTF_DIR="/home/ctfdeploy/csc-ctf-production/chall"
             cd "$CTF_DIR"
 
-            echo "📦 Pulling update terbaru dari Git..."
-            git pull origin main
+            echo "📦 Menyinkronkan dengan repository Git terbaru..."
+            # 2. Ganti git pull dengan fetch dan hard reset untuk memaksa VPS menimpa perubahan lokal
+            git fetch --all
+            git reset --hard origin/main
 
             IFS='|' read -r -a dir_array <<< "$CHALL_DIRS"
 
@@ -185,7 +190,8 @@ jobs:
               if [ -d "$CTF_DIR/$dir" ]; then
                 cd "$CTF_DIR/$dir"
                 docker compose down --remove-orphans
-                docker compose up -d --build
+                # 3. Tambahkan flag --force-recreate untuk memastikan container di-deploy ulang dengan port baru
+                docker compose up -d --build --force-recreate
                 cd "$CTF_DIR"
               else
                 echo "⚠️ Folder $dir tidak ditemukan di VPS!"
