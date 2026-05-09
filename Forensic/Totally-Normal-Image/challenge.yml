@@ -18,7 +18,7 @@ state: visible
 # JANGAN DI UBAH
 
 flags:
-  - content: "CSC{4nd4_m3n3muk4n_fl49_ny4}"
+  - content: "CSC{4nd4_m3n3mku4n_fl49_ny4}"
     type: static
 tags:
   - easy
