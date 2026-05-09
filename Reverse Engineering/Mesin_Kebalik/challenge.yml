@@ -3,6 +3,8 @@ author: "Piwww"
 category: Reverse Engineering
 description: |
   Sebuah file binary yang tampaknya meminta input berupa "Admin Key". Namun, tujuan utama dari challenge ini adalah untuk menganalisis binary tersebut menggunakan teknik reverse engineering untuk menemukan flag yang tersembunyi di dalamnya.
+  
+  author: Piwww
 
 # JANGAN DI UBAH
 type: dynamic

@@ -7,6 +7,8 @@ description: |
 
   FORMAT : CSC{NamaTempatAkuSekarang}
 
+  author: yaaoware
+
 # JANGAN DI UBAH
 type: dynamic
 value: 500
