@@ -3,6 +3,8 @@ author: "senz"
 category: Reverse Engineering
 description: |
   the calculator program is leaked? lets see if there is something sketchy with the anggaran.
+  
+  author: senz
 
 # JANGAN DI UBAH
 type: dynamic
