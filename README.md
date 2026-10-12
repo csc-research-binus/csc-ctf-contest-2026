@@ -1,58 +1,67 @@
-# CSC CTF Contest 2026 🚩
+# CSC CTF Contest 2026
 
-Repositori ini digunakan untuk manajemen dan deployment soal-soal (challenges) CSC CTF 2026.
-Sistem deployment sudah diotomatisasi menggunakan GitHub Actions untuk sinkronisasi soal ke CTFd dan menjalankan container soal (Web, Pwn, dll) di VPS.
+Repository manajemen dan deployment challenge CSC CTF 2026.
 
-## 📂 Struktur Direktori Kategori
+## Struktur Kategori
 
-Silakan masukkan soal buatan kalian ke dalam direktori kategori yang sesuai:
-- `web/` - Web Exploitation
-- `binex/` - Binary Exploitation (Pwn)
-- `crypto/` - Cryptography
-- `forensics/` - Digital Forensics
-- `reverse/` - Reverse Engineering
-- `misc/` - Miscellaneous
+Masukkan tantangan ke direktori kategori yang sesuai:
+- `Binary Exploitation/`
+- `Cryptography/`
+- `Forensic/`
+- `Miscellaneous/`
+- `Reverse Engineering/`
+- `Web Exploitation/`
+- `warmup/` (sub-kategori pemanasan)
 
-## 🛠️ Cara Membuat Soal Baru
+## Panduan Penambahan Challenge
 
-1. Buat folder baru di dalam kategori yang sesuai, misal: `web/my-web-chall/`.
-2. Di dalam folder tersebut, **wajib** ada file `challenge.yml`. Kalian bisa meng-copy file `challenge.yml` yang ada di luar (root) repo ini sebagai template.
-3. Untuk soal yang memiliki file *attachment* (contoh: `.zip`, `.pcap`, file binary), masukkan file tersebut ke dalam folder (misal `web/my-web-chall/dist/source.zip`) dan daftarkan di `challenge.yml` pada bagian `files:`.
-4. Untuk soal yang membutuhkan server/container (contoh: Web, Binex/Pwn), buat file `docker-compose.yml` di dalam folder soal kalian (misal `web/my-web-chall/docker-compose.yml`).
+1. Buat folder baru di bawah kategori terkait, contoh: `Web Exploitation/sample-chall/`.
+2. Setiap folder soal wajib memiliki `challenge.yml` valid (ikuti format `_template/challenge.yml.example` atau spesifikasi `ctfcli`).
+3. File attachment (zip, pcap, binary, source code) diletakkan di dalam folder soal (misal `dist/`) dan didaftarkan pada atribut `files:` di `challenge.yml`.
+4. Untuk soal dinamis / berbasis server, sediakan `docker-compose.yml` di root folder soal tersebut.
+5. Format flag standar: `CSC{...}`.
+6. Pastikan port host pada `ports: "HOST_PORT:CONTAINER_PORT"` di `docker-compose.yml` tidak konflik dengan soal lain.
 
-### Contoh Struktur Soal dengan Docker (Web/Binex):
+### Contoh Soal dengan Container
+
 ```text
-web/my-web-chall/
+Web Exploitation/sample-chall/
 ├── challenge.yml
 ├── docker-compose.yml
 ├── Dockerfile
 └── src/
-    ├── index.php
+    ├── app.py
     └── flag.txt
 ```
 
-### Contoh Struktur Soal Statis (Forensics/Reverse/Crypto):
+### Contoh Soal Statis
+
 ```text
-forensics/my-forensics-chall/
+Forensic/sample-forensic/
 ├── challenge.yml
 └── dist/
-    └── evidence.pcap
+    └── capture.pcapng
 ```
 
-## 🚀 Deployment Otomatis (CI/CD)
+## Alur CI/CD
 
-Repositori ini menggunakan **2 tahap deployment otomatis** setiap kali ada yang melakukan *push* ke branch `main`:
-1. **Sync CTFd:** Membaca semua file `challenge.yml` lalu mengunggah deskripsi, file attachment, serta flag langsung ke platform CTFd menggunakan `ctfcli`.
-2. **Deploy VPS:** GitHub Actions akan login ke VPS via SSH, melakukan `git pull`, lalu mencari seluruh file `docker-compose.yml` dan menjalankan `docker compose up -d --build` secara terisolasi untuk tiap-tiap soal.
+Deployment dikelola secara otomatis menggunakan GitHub Actions:
 
-### 🔐 Secret yang Dibutuhkan di GitHub
-Bagi admin repositori, pastikan GitHub Secrets berikut sudah dikonfigurasi di pengaturan repositori (Settings > Secrets and variables > Actions):
-- `CTFD_URL` : URL CTFd (contoh: `https://ctf.domain.com`)
-- `CTFD_TOKEN` : Token API dari Admin CTFd (Generate dari Settings CTFd)
-- `SSH_HOST` : IP Address VPS untuk menjalankan Docker
-- `SSH_USER` : Username VPS (contoh: `root`)
-- `SSH_PRIVATE_KEY` : Private Key SSH untuk login ke VPS
+1. **Gatekeeper (`gatekeeper.yml`)**
+   - Menjaga integritas branch `main`.
+   - Mengharuskan review approval dari akun admin terdaftar (`darflashxd`, `eludee`, `wavess`) sebelum PR dapat digabungkan.
 
-## ⚠️ Aturan Tambahan untuk Probsetter
-- Pastikan **Port Host** yang digunakan di `docker-compose.yml` pada bagian `ports: "HOST_PORT:CONTAINER_PORT"` **tidak bentrok** antar soal. Koordinasikan port yang kalian pakai dengan admin atau probsetter lainnya.
-- Format flag standar adalah: `CSC{...}`
+2. **Sync CTFd & Deploy VPS (`deploy.yml`)**
+   - Berjalan pada event `push` ke branch `main` atau dipicu manual lewat `workflow_dispatch`.
+   - **Sync CTFd**: Menggunakan `ctfcli` untuk sinkronisasi metadata soal (`challenge.yml`), flag, tags, dan upload file attachment.
+   - **Deploy VPS**: Akses SSH ke VPS, update repository (`git fetch && git reset --hard origin/main`), rebuild container terkait (`docker compose up -d --build --force-recreate`), dan pembersihan image lama (`docker image prune -f`).
+
+### Konfigurasi GitHub Secrets
+
+Pastikan secret berikut sudah terdaftar di repository settings:
+- `CTFD_URL`: Endpoint CTFd instans
+- `CTFD_TOKEN`: Token API admin CTFd
+- `SSH_HOST`: IP atau hostname server Docker
+- `SSH_USER`: Username SSH VPS
+- `SSH_PORT`: Port SSH server
+- `SSH_PRIVATE_KEY`: Kunci privat SSH untuk autentikasi deployment
