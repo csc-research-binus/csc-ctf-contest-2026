@@ -1,11 +1,10 @@
-name: "Battle Free Fire"
-author: "yaaoware"
-category: Miscellaneous
+name: "challenge_name"
+author: "author_name"
+category: Miscellaneous # Set matching category
 description: |
-  Aku sedang bermain game tembak tembakan, waktu di lobby jaringan aku ngelag banget guys jadi nya aku coba reconnecting deh sampai berhasil... 
-  Setelah in game, aku kaget kok gada siapa siapa ya ? aku kayaknya kepisah deh...
+  Challenge description goes here.
 
-# JANGAN DI UBAH
+# DO NOT MODIFY
 type: dynamic
 value: 500
 extra:
@@ -13,18 +12,17 @@ extra:
   decay: 30
   minimum: 100
 state: visible
-# JANGAN DI UBAH
+# DO NOT MODIFY
 
 flags:
-  - content: "CSC{Stadium}"
+  - content: "CSC{flag}"
     type: static
 tags:
-  - easy
-files:
-  - source.png
+  - easy # Set challenge difficulty
+files: []
 
-#kalo ada file ganti jadi
-# files :
-# - nama file
+# If challenge has attachments, uncomment and specify file paths:
+# files:
+#   - dist/attachment.zip
 
-hints: [] #hints gausah di isi
+hints: [] # Leave empty unless approved

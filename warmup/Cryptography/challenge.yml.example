@@ -1,28 +1,28 @@
-name: "nama soal"
-author: "darflashxd"
-category: Miscellaneous
+name: "challenge_name"
+author: "author_name"
+category: Miscellaneous # Set matching category
 description: |
-  deskripsi soal
+  Challenge description goes here.
 
-# JANGAN DI UBAH
+# DO NOT MODIFY
 type: dynamic
 value: 500
 extra:
   initial: 500
   decay: 30
   minimum: 100
-state: hidden
-# JANGAN DI UBAH
+state: visible
+# DO NOT MODIFY
 
 flags:
   - content: "CSC{flag}"
-    type: statics
+    type: static
 tags:
-  - Miscellaneous
+  - easy # Set challenge difficulty
 files: []
 
-#kalo ada file ganti jadi
-# files :
-# - nama file
+# If challenge has attachments, uncomment and specify file paths:
+# files:
+#   - dist/attachment.zip
 
-hints: [] #hints gausah di isi
+hints: [] # Leave empty unless approved

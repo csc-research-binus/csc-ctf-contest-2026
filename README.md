@@ -1,28 +1,28 @@
 # CSC CTF Contest 2026
 
-Repository manajemen dan deployment challenge CSC CTF 2026.
+Challenge repository and deployment automation for CSC CTF 2026.
 
-## Struktur Kategori
+## Category Structure
 
-Masukkan tantangan ke direktori kategori yang sesuai:
+Organize challenges under their respective category directories:
 - `Binary Exploitation/`
 - `Cryptography/`
 - `Forensic/`
 - `Miscellaneous/`
 - `Reverse Engineering/`
 - `Web Exploitation/`
-- `warmup/` (sub-kategori pemanasan)
+- `warmup/` (introductory challenges)
 
-## Panduan Penambahan Challenge
+## Challenge Authoring Guidelines
 
-1. Buat folder baru di bawah kategori terkait, contoh: `Web Exploitation/sample-chall/`.
-2. Setiap folder soal wajib memiliki `challenge.yml` valid (ikuti format `_template/challenge.yml.example` atau spesifikasi `ctfcli`).
-3. File attachment (zip, pcap, binary, source code) diletakkan di dalam folder soal (misal `dist/`) dan didaftarkan pada atribut `files:` di `challenge.yml`.
-4. Untuk soal dinamis / berbasis server, sediakan `docker-compose.yml` di root folder soal tersebut.
-5. Format flag standar: `CSC{...}`.
-6. Pastikan port host pada `ports: "HOST_PORT:CONTAINER_PORT"` di `docker-compose.yml` tidak konflik dengan soal lain.
+1. Create a dedicated directory under the target category, e.g., `Web Exploitation/sample-chall/`.
+2. Each challenge directory must contain a valid `challenge.yml` conforming to the `ctfcli` specification (refer to `_template/challenge.yml.example`).
+3. Place distribution attachments (zip archives, pcaps, binaries, source code) in the challenge folder (e.g., `dist/`) and declare them under the `files:` section in `challenge.yml`.
+4. For service-based challenges (Web, Pwn), include a `docker-compose.yml` in the challenge root directory.
+5. Standard flag format: `CSC{...}`.
+6. Ensure host port bindings under `ports: "HOST_PORT:CONTAINER_PORT"` in `docker-compose.yml` do not collide with other challenges.
 
-### Contoh Soal dengan Container
+### Containerized Challenge Layout
 
 ```text
 Web Exploitation/sample-chall/
@@ -34,7 +34,7 @@ Web Exploitation/sample-chall/
     └── flag.txt
 ```
 
-### Contoh Soal Statis
+### Static Challenge Layout
 
 ```text
 Forensic/sample-forensic/
@@ -43,25 +43,25 @@ Forensic/sample-forensic/
     └── capture.pcapng
 ```
 
-## Alur CI/CD
+## CI/CD Deployment Pipeline
 
-Deployment dikelola secara otomatis menggunakan GitHub Actions:
+Challenge deployment is automated via GitHub Actions:
 
 1. **Gatekeeper (`gatekeeper.yml`)**
-   - Menjaga integritas branch `main`.
-   - Mengharuskan review approval dari akun admin terdaftar (`darflashxd`, `eludee`, `wavess`) sebelum PR dapat digabungkan.
+   - Validates pull requests targeting `main`.
+   - Requires review approval from authorized admins (`darflashxd`, `eludee`, `wavess`) before merging.
 
-2. **Sync CTFd & Deploy VPS (`deploy.yml`)**
-   - Berjalan pada event `push` ke branch `main` atau dipicu manual lewat `workflow_dispatch`.
-   - **Sync CTFd**: Menggunakan `ctfcli` untuk sinkronisasi metadata soal (`challenge.yml`), flag, tags, dan upload file attachment.
-   - **Deploy VPS**: Akses SSH ke VPS, update repository (`git fetch && git reset --hard origin/main`), rebuild container terkait (`docker compose up -d --build --force-recreate`), dan pembersihan image lama (`docker image prune -f`).
+2. **CTFd Synchronization & VPS Deployment (`deploy.yml`)**
+   - Triggers on push to `main` or manual `workflow_dispatch`.
+   - **CTFd Sync**: Uses `ctfcli` to synchronize challenge metadata (`challenge.yml`), flags, tags, and upload file attachments directly to the CTFd instance.
+   - **VPS Deploy**: Authenticates to the server via SSH, pulls the latest changes (`git fetch && git reset --hard origin/main`), rebuilds and restarts modified containers (`docker compose up -d --build --force-recreate`), and prunes unused images (`docker image prune -f`).
 
-### Konfigurasi GitHub Secrets
+### Required GitHub Secrets
 
-Pastikan secret berikut sudah terdaftar di repository settings:
-- `CTFD_URL`: Endpoint CTFd instans
-- `CTFD_TOKEN`: Token API admin CTFd
-- `SSH_HOST`: IP atau hostname server Docker
-- `SSH_USER`: Username SSH VPS
-- `SSH_PORT`: Port SSH server
-- `SSH_PRIVATE_KEY`: Kunci privat SSH untuk autentikasi deployment
+Configure the following secrets in repository settings:
+- `CTFD_URL`: Base URL of the CTFd instance
+- `CTFD_TOKEN`: CTFd admin API access token
+- `SSH_HOST`: Target server IP address or hostname
+- `SSH_USER`: SSH deployment user
+- `SSH_PORT`: SSH port
+- `SSH_PRIVATE_KEY`: Private SSH key for server authentication
